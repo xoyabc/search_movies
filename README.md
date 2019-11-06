@@ -6,8 +6,8 @@ search download link of movie
 
 从 [6vdy电影网](http://www.hao6v.com/) 搜素影片，并返回对应链接。
 
-```bash
-python search_movie_6vdy.py 巴黎野玫瑰
+```shell
+$python search_movie_6vdy.py 巴黎野玫瑰
 Search result link: http://so.hao6v.com/e/search/result/?searchid=739478
 Status code: 200
 名称：经典高分剧情《巴黎野玫瑰》720p.BD中英双字 链接：http://so.hao6v.com/gq/2015-06-08/BLYMG.html
