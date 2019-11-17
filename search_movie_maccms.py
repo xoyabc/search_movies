@@ -11,9 +11,6 @@ from bs4 import BeautifulSoup
 # solve SNIMissingWarning, InsecurePlatformWarning on urllib3 when using < Python 2.7.9
 import urllib3
 urllib3.disable_warnings()
-
-import chardet
-
 '''
 1，多页：教父
 2，一页: 某种女人
