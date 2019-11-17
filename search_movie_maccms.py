@@ -6,12 +6,13 @@ import re
 import json
 import random
 import time
-import  chardet
 from urllib import quote
 from bs4 import BeautifulSoup
 # solve SNIMissingWarning, InsecurePlatformWarning on urllib3 when using < Python 2.7.9
 import urllib3
 urllib3.disable_warnings()
+
+import chardet
 
 '''
 1，多页：教父
@@ -151,11 +152,33 @@ def get_db_mv_week():
         name = i.a.text.strip()
         link = i.a['href'].strip()
         year_soup = get_one(link)
+        # get year
         year = re.sub(r'(\(|\))', '', year_soup.select('span[class="year"]')[0].text)
-        #print i.a['href'],name,year
-        content = str(search_maccms(name, year)) + "\n" if search_maccms(name, year) else ''
-        contents.append(content)
-        #time.sleep(1 + random.randint(1, 3))
+        # get release date and region
+        pattern = re.compile(r'(?P<r_date>.*)\((?P<r_region>.*)\)')
+        release_date = r_date = r_region = None
+        ab_value = 0
+        # 距上映已过/还有多少天，90天内的排除
+        ts_now = int(time.time())
+        safe_interval = 24*3600*90 
+        try:
+            for date in year_soup.select('span[property="v:initialReleaseDate"]'):
+                r_date = pattern.search(date.text).group('r_date')
+                r_region = pattern.search(date.text).group('r_region').encode('utf-8')
+                format_time = r_date + ' 00:00:00'
+                ts = time.strptime(format_time, "%Y-%m-%d %H:%M:%S")
+                ts_r_date = int(time.mktime(ts))
+                ab_value = abs(ts_now-ts_r_date)
+                if '中国大陆'.decode('utf-8').encode("utf-8") in r_region and ab_value <= safe_interval:
+                    release_date = r_date
+        except:
+            pass
+        if not release_date:
+            #print i.a['href'],name,year,release_date,r_date,r_region,"已上映" + str(ab_value/86400) + "天"
+            #print i.a['href'],name,year
+            content = str(search_maccms(name, year)) + "\n" if search_maccms(name, year) else ''
+            contents.append(content)
+            time.sleep(1 + random.randint(1, 3))
     send_msg = MESSAGE.format("".join(contents))
     print send_msg
 
@@ -181,5 +204,5 @@ if __name__ == '__main__':
         content = search_maccms(name)
         print content
     except Exception as e:
-        #get_db_mv_week()
+        get_db_mv_week()
         search_by_movie_name()
