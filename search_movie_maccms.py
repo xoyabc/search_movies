@@ -19,6 +19,7 @@ urllib3.disable_warnings()
 file = 'movie.name'
 url = "http://ys.louxiaohui.com/index.php"
 base_url = "https://ys.louxiaohui.com"
+douban_weekly_movies = 'douban_weekly_movies.list'
 
 # 请求参数
 querystring = {"m":"vod-search"}
@@ -39,6 +40,17 @@ headers = {
     }
 
 
+douban_headers = {
+     'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.81 Safari/537.36',
+     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+     'Accept-Encoding': 'gzip, deflate, sdch',
+     'Accept-Language': 'zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4,en-GB;q=0.2,zh-TW;q=0.2',
+     'Connection': 'keep-alive',
+     'DNT': '1',
+     'HOST': 'movie.douban.com',
+     'Cookie': 'iv5LdR0AXBc'
+}
+
 # 生成短链
 def gen_short_url(long_url):
     #url = 'http://tools.aeink.com/tools/dwz/urldwz.php'
@@ -56,9 +68,9 @@ def gen_short_url(long_url):
         return short_link
 
 # 发送get请求
-def get_one(request_url):
+def get_one(request_url, headers=None):
     # add verify=False to solve 'SSLError(CertificateError'
-    resp = requests.get(request_url, verify=False)
+    resp = requests.get(request_url, headers=headers, verify=False)
     html = resp.text
     soup = BeautifulSoup(html.encode('utf-8'), "html.parser")
     return soup
@@ -136,46 +148,69 @@ def search_maccms(name, year = None):
     return movie_info
 
 
+def search_from_file(filename, key_word, filed_num):
+    with open (filename, 'rU') as f:
+        for line in f:
+            if key_word == line.strip().split()[filed_num]:
+                return True
+        return False 
+
+
+def save_file(filename, content):
+    with open (filename, 'a+') as f:
+        f.write(content + "\n") 
+
+
 # 豆瓣口碑榜
 def get_db_mv_week():
+    cur_date = time.strftime('%Y-%m-%d')
     url = 'https://movie.douban.com/chart'
-    soup = get_one(url)
+    soup = get_one(url, headers=douban_headers)
     MESSAGE = """
 *** 本周豆瓣口碑榜 start ***
 {}*** 本周豆瓣口碑榜 end *** 
 """
     contents = []
     for i in soup.select('#listCont2 > li[class="clearfix"] > div[class="name"]'):
-        name = i.a.text.strip()
         link = i.a['href'].strip()
-        year_soup = get_one(link)
-        # get year
-        year = re.sub(r'(\(|\))', '', year_soup.select('span[class="year"]')[0].text)
-        # get release date and region
-        pattern = re.compile(r'(?P<r_date>.*)\((?P<r_region>.*)\)')
-        release_date = r_date = r_region = None
-        ab_value = 0
-        # 距上映已过/还有多少天，90天内的排除
-        ts_now = int(time.time())
-        safe_interval = 24*3600*90 
-        try:
-            for date in year_soup.select('span[property="v:initialReleaseDate"]'):
-                r_date = pattern.search(date.text).group('r_date')
-                r_region = pattern.search(date.text).group('r_region').encode('utf-8')
-                format_time = r_date + ' 00:00:00'
-                ts = time.strptime(format_time, "%Y-%m-%d %H:%M:%S")
-                ts_r_date = int(time.mktime(ts))
-                ab_value = abs(ts_now-ts_r_date)
-                if '中国大陆'.decode('utf-8').encode("utf-8") in r_region and ab_value <= safe_interval:
-                    release_date = r_date
-        except:
-            pass
-        if not release_date:
-            #print i.a['href'],name,year,release_date,r_date,r_region,"已上映" + str(ab_value/86400) + "天"
-            #print i.a['href'],name,year
-            content = str(search_maccms(name, year)) + "\n" if search_maccms(name, year) else ''
-            contents.append(content)
-            time.sleep(1 + random.randint(1, 3))
+        # 之前的口碑榜影片不发
+        if not search_from_file(douban_weekly_movies, link, 1):
+            name = i.a.text.strip()
+            year_soup = get_one(link, headers=douban_headers)
+            #year_soup = get_one('https://movie.douban.com/subject/4436880/', headers=douban_headers)
+            # get year
+            year = re.sub(r'(\(|\))', '', year_soup.select('span[class="year"]')[0].text)
+            # get release date and region
+            pattern = re.compile(r'(?P<r_date>.*)\((?P<r_region>.*)\)')
+            release_date = r_date = r_region = None
+            ab_value = None
+            # 距上映已过/还有多少天，90天内的排除
+            ts_now = int(time.time())
+            safe_interval = 24*3600*90 
+            try:
+                for date in year_soup.select('span[property="v:initialReleaseDate"]'):
+                    r_date = pattern.search(date.text).group('r_date')
+                    r_region = pattern.search(date.text).group('r_region').encode('utf-8')
+                    format_time = r_date + ' 00:00:00'
+                    ts = time.strptime(format_time, "%Y-%m-%d %H:%M:%S")
+                    ts_r_date = int(time.mktime(ts))
+                    ab_value = abs(ts_now-ts_r_date)
+                    if '中国大陆'.decode('utf-8').encode("utf-8") in r_region and ab_value <= safe_interval:
+                        release_date = r_date
+            except:
+                pass
+            if not ab_value:
+                release_info = '无上映信息或尚未上映'
+            else:
+                release_info = "已上映" + str(ab_value/86400) + "天"
+            if not release_date:
+                print i.a['href'],name,year,release_date,r_date,r_region,release_info
+                print i.a['href'],name,year
+                content = str(search_maccms(name, year)) + "\n" if search_maccms(name, year) else ''
+                contents.append(content)
+                time.sleep(1 + random.randint(1, 5))
+            # 查找成功且短链生成后将日期及链接写入到文件
+            save_file(douban_weekly_movies, cur_date + ' ' + str(link))
     send_msg = MESSAGE.format("".join(contents))
     print send_msg
 
@@ -191,6 +226,7 @@ def search_by_movie_name():
             name = line.split()[0].strip()
             content = str(search_maccms(name)) + "\n" if search_maccms(name) else ''
             contents.append(content)
+            time.sleep(1 + random.randint(1, 5))
     send_msg = MESSAGE.format("".join(contents))
     print send_msg
 
@@ -202,4 +238,4 @@ if __name__ == '__main__':
         print content
     except Exception as e:
         get_db_mv_week()
-        search_by_movie_name()
+        #search_by_movie_name()
