@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 import requests
-import sys
+import os
 import re
 import json
 import random
@@ -14,6 +14,10 @@ from smtplib import SMTP_SSL
 # solve SNIMissingWarning, InsecurePlatformWarning on urllib3 when using < Python 2.7.9
 import urllib3
 urllib3.disable_warnings()
+# solve UnicodeEncodeError: 'ascii' codec can't encode characters in position 0-4: ordinal not in range(128)
+import sys
+reload(sys)
+sys.setdefaultencoding("utf-8")
 '''
 1，一页: 某种女人
 2，多页：教父
@@ -23,7 +27,8 @@ https://movie.douban.com/subject/4436880/
 
 url = "http://ys.louxiaohui.com/index.php"
 base_url = "https://ys.louxiaohui.com"
-douban_weekly_movies = 'douban_weekly_movies.list'
+BASEPATH = os.path.realpath(os.path.dirname(__file__))
+douban_weekly_movies = BASEPATH + os.sep + 'douban_weekly_movies.list'
 receivers = [
 '1031138448@qq.com',
 #'842781226@qq.com',
@@ -203,11 +208,10 @@ def get_db_mv_week():
 {}*** 本周豆瓣口碑榜 end *** 
 """
     contents = []
-    for i in soup.select('#listCont2 > li[class="clearfix"] > div[class="name"]')[0:2]:
+    for i in soup.select('#listCont2 > li[class="clearfix"] > div[class="name"]'):
         link = i.a['href'].strip()
         # 之前发过的口碑榜影片不再发
-        #if not search_from_file(douban_weekly_movies, link, 1):
-        if search_from_file(douban_weekly_movies, link, 1):
+        if not search_from_file(douban_weekly_movies, link, 1):
             name = i.a.text.strip()
             year_soup = get_one(link, headers=douban_headers)
             # get year
@@ -242,7 +246,7 @@ def get_db_mv_week():
                 contents.append(content)
                 time.sleep(1 + random.randint(1, 5))
             # 查找成功且短链生成后将日期及链接写入到文件
-            # save_file(douban_weekly_movies, cur_date + ' ' + str(link))
+            save_file(douban_weekly_movies, cur_date + ' ' + str(link))
     send_msg = MESSAGE.format("".join(contents))
     # 有新影片时发送邮件
     if len(contents) > 0:
