@@ -6,7 +6,7 @@ import re
 import json
 import random
 import time
-from urllib import quote
+from urllib import quote, quote_plus
 from bs4 import BeautifulSoup
 from email.mime.text import MIMEText
 from email.header import Header
@@ -25,8 +25,10 @@ sys.setdefaultencoding("utf-8")
 https://movie.douban.com/subject/4436880/
 '''
 
-url = "http://ys.louxiaohui.com/index.php"
-base_url = "https://ys.louxiaohui.com"
+#url = "http://ys.louxiaohui.com/index.php"
+#base_url = "https://ys.louxiaohui.com"
+url = "http://vowys.xyz/index.php"
+base_url = "https://vowys.xyz"
 BASEPATH = os.path.realpath(os.path.dirname(__file__))
 douban_weekly_movies = BASEPATH + os.sep + 'douban_weekly_movies.list'
 receivers = [
@@ -65,14 +67,19 @@ douban_headers = {
      'Cookie': 'iv5LdR0AXBc'
 }
 
+tiny_headers = { 'user-agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36" }
+
 # 生成短链
 def gen_short_url(long_url):
-    url = "http://sa.sogou.com/gettiny"
-    payload = {'url': long_url}
+    #url = "http://sa.sogou.com/gettiny"
+    #payload = {'url': long_url}
+    long_url = quote_plus(long_url)
+    url = "http://tny.im/yourls-api.php"
+    payload = {'url': long_url, 'action': 'shorturl', 'format': 'simple'}
     try:
-        resp = requests.get(url, params=payload)
+        #resp = requests.get(url, params=payload)
+        resp = requests.get(url, params=payload, headers=tiny_headers)
         #print resp.text
-        #json_data = json.loads(resp.text)
         short_link = resp.text.strip()
     except Exception as e:
         short_link = None
@@ -204,6 +211,7 @@ def get_db_mv_week():
     url = 'https://movie.douban.com/chart'
     soup = get_one(url, headers=douban_headers)
     MESSAGE = """
+（链接需要复制到浏览器后打开）
 *** 本周豆瓣口碑榜 start ***
 {}*** 本周豆瓣口碑榜 end *** 
 """
@@ -244,7 +252,7 @@ def get_db_mv_week():
                 print i.a['href'],name,year
                 content = str(search_maccms(name, year)) + "\n" if search_maccms(name, year) else ''
                 contents.append(content)
-                time.sleep(1 + random.randint(1, 5))
+                time.sleep(105 + random.randint(1, 5))
             # 查找成功且短链生成后将日期及链接写入到文件
             save_file(douban_weekly_movies, cur_date + ' ' + str(link))
     send_msg = MESSAGE.format("".join(contents))
