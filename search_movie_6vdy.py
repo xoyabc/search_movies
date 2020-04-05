@@ -62,8 +62,8 @@ def search_6vdy():
     for item in top_5_result:
         link =  item.a['href']
         title = item.a.text.encode('utf-8')
-        real_link = 'http://so.hao6v.com' + link
-        print "名称：{} 链接：{}" .format(title, real_link)
+        #real_link = 'http://so.hao6v.com' + link
+        print "名称：{} 链接：{}" .format(title, link)
     
     '''
     # Method 2, get title and link
