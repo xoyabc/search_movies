@@ -67,20 +67,20 @@ douban_headers = {
      'Cookie': 'iv5LdR0AXBc'
 }
 
-tiny_headers = { 'user-agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36" }
+tiny_headers = { 'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36" }
 
 # 生成短链
 def gen_short_url(long_url):
     #url = "http://sa.sogou.com/gettiny"
     #payload = {'url': long_url}
     long_url = quote_plus(long_url)
-    url = "http://tny.im/yourls-api.php"
-    payload = {'url': long_url, 'action': 'shorturl', 'format': 'simple'}
+    url = "https://www.98api.cn/api/sinaDwz.php"
+    payload = {'url': long_url}
     try:
         #resp = requests.get(url, params=payload)
-        resp = requests.get(url, params=payload, headers=tiny_headers)
+        resp = requests.get(url, params=payload, headers=tiny_headers, verify=False)
         #print resp.text
-        short_link = resp.text.strip()
+        short_link = resp.json()['short_url']
     except Exception as e:
         short_link = None
     finally:
