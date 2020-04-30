@@ -148,7 +148,10 @@ def search_by_movie_name():
     contents = []
     with open(file, 'rU') as f:
         for line in f:
-            name = line.split()[0].strip()
+	    if line.strip():
+                name = line.split()[0].strip()
+            else:
+                continue
             content = str(search_maccms(name)) + "\n" if search_maccms(name) else ''
             print content
             contents.append(content)
