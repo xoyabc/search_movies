@@ -6,7 +6,7 @@ import re
 import json
 import random
 import time
-from urllib import quote
+from urllib import quote, quote_plus
 from bs4 import BeautifulSoup
 # solve SNIMissingWarning, InsecurePlatformWarning on urllib3 when using < Python 2.7.9
 import urllib3
@@ -17,8 +17,8 @@ urllib3.disable_warnings()
 '''
 
 file = 'movie.name'
-url = "http://ys.louxiaohui.com/index.php"
-base_url = "https://ys.louxiaohui.com"
+url = "http://vowys.xyz/index.php"
+base_url = "https://vowys.xyz"
 
 # 请求参数
 querystring = {"m":"vod-search"}
@@ -38,16 +38,21 @@ headers = {
     'user-agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36",
     }
 
+tiny_headers = { 'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36" }
 
 # 生成短链
+# REF: https://greasyfork.org/en/scripts/388488-%E7%9F%AD%E9%93%BE%E6%8E%A5%E7%94%9F%E6%88%90%E5%99%A8/code
 def gen_short_url(long_url):
-    url = "http://sa.sogou.com/gettiny"
+    #url = "http://sa.sogou.com/gettiny"
+    #payload = {'url': long_url}
+    long_url = quote_plus(long_url)
+    url = "https://www.98api.cn/api/sinaDwz.php"
     payload = {'url': long_url}
     try:
-        resp = requests.get(url, params=payload)
-        #print resp.text
-        #json_data = json.loads(resp.text)
-        short_link = resp.text.strip()
+        #resp = requests.get(url, params=payload)
+        resp = requests.get(url, params=payload, headers=tiny_headers, verify=False)
+        print resp.text
+        short_link = resp.json()['short_url']
     except Exception as e:
         short_link = None
     finally:
