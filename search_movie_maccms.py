@@ -51,7 +51,7 @@ def gen_short_url(long_url):
     try:
         #resp = requests.get(url, params=payload)
         resp = requests.get(url, params=payload, headers=tiny_headers, verify=False)
-        print resp.text
+        #print resp.text
         short_link = resp.json()['short_url']
     except Exception as e:
         short_link = None
@@ -68,6 +68,10 @@ def get_one(request_url, headers=None):
     return soup
 
 
+# 从搜索结果中查找对应影片
+# 1，若无年份，比对片名
+# 2，若有年份，比对片名及年份
+# 3，找不到时返回 None
 def get_movie_info(all_result, movie_year):
     for i in all_result:
         link = i.select('div[class="l"] > h2 > a')[0]['href'].encode('utf-8').strip()
@@ -109,29 +113,35 @@ def search_maccms(name, year = None):
     html = response.text
     soup = BeautifulSoup(html.encode('utf-8'), "html.parser")
     all_result = soup.select('div[class="channel b"] > ul > li')[0:10]
-    if len(all_result) > 0:
+    if len(all_result) > 0 and len(all_result) < 9:
         movie_info = get_movie_info(all_result, year)
         #print movie_info
     elif len(all_result) == 0:
         pass
         #print ("未找到相关影片，请更换关键词")
-    # 翻页，单独一个 if，避免结果数小于 9 时，执行提取下一页链接的 try 语句
+    # 搜索结果条目数大于 10 时，翻页查找
+    # 单独一个 if，避免结果数小于 9 时，执行提取下一页链接的 try 语句
     if len(all_result) >= 9:
         NEXT_PAGE = True
+        # 找不到影片时继续往后查找
         NEXT_MOVIE = True if not get_movie_info(all_result, year) else False
         #print "NEXT_MOVIE: {}".format(NEXT_MOVIE)
+        # 提取 下一页 链接，若异常，则 NEXT_PAGE 为False
         try:
             next_page_link = soup.find("a", class_="pagelink_a", text=re.compile("下一页".decode("utf-8")))['href']
             real_next_page_link = base_url + next_page_link
         except Exception as e:
             NEXT_PAGE = False
+        # 下一页存在且未找到影片时，遍历下一页，直到结束
         while NEXT_PAGE and NEXT_MOVIE:
             #print real_next_page_link
             soup = get_one(real_next_page_link)
             all_result = soup.select('div[class="channel b"] > ul > li')[0:10] 
             movie_info = get_movie_info(all_result, year)
             #print movie_info
+            # 找不到影片时继续往后查找
             NEXT_MOVIE = True if not get_movie_info(all_result, year) else False
+            # 更新下一页地址
             try:
                 next_page_link = soup.find("a", class_="pagelink_a", text=re.compile("下一页".decode("utf-8")))['href']
                 real_next_page_link = base_url + next_page_link
