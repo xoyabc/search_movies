@@ -113,7 +113,7 @@ def search_maccms(name, year = None):
     html = response.text
     soup = BeautifulSoup(html.encode('utf-8'), "html.parser")
     all_result = soup.select('div[class="channel b"] > ul > li')[0:10]
-    if len(all_result) > 0 and len(all_result) < 9:
+    if len(all_result) > 0 and len(all_result) <= 9:
         movie_info = get_movie_info(all_result, year)
         #print movie_info
     elif len(all_result) == 0:
