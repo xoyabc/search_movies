@@ -9,4 +9,4 @@ RUN apt-get -y install g++ git
 
 RUN mkdir /home/git; \
     cd /home/git; \
-    sudo git clone https://github.com/xoyabc/search_movies.git -b master;
+    git clone https://github.com/xoyabc/search_movies.git -b master;
