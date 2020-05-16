@@ -44,6 +44,15 @@
 院线/非院线(在没在中国大陆上映)
 ```
 
+## Run in Docker
+
+```shell
+docker pull xoyabc/search_movie
+
+docker run -it -d --name search_movies xoyabc/search_movies:latest
+
+docker exec -it search_movies /bin/bash
+```
 
 ## search_movie_6vdy.py
 
