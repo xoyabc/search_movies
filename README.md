@@ -1,4 +1,5 @@
-# search_movies
+## search_movies 实现方法
+
 1，搜索结果只有一个：“绀青之拳”
 （对比年份及片名，片名及年份 或 片名 一致即可 ）
 
@@ -52,6 +53,37 @@ docker pull xoyabc/search_movie
 docker run -it -d --name search_movies xoyabc/search_movies:latest
 
 docker exec -it search_movies /bin/bash
+```
+
+## search_movie_maccms.py
+
+将片名贴入到 movie.name 中，执行 search_movie_maccms.py 即可，输出格式见下：
+```plain
+[片名][年份]
+短链接
+```
+
+```shell
+root@b0b3fd4693fe:/home/git/search_movies#  cat movie.name 
+一九零零
+天堂的孩子
+安德烈·卢布廖夫
+巴里·林登
+芬妮与亚历山大
+豹
+阿拉伯的劳伦斯
+
+
+python search_movie_maccms.py
+
+*** 新片/经典 start ***
+[一九零零][1976]
+http://t.cn/Ai3sAGR7
+[芬妮与亚历山大][1982]
+http://t.cn/Ai3sAGR7
+[阿拉伯的劳伦斯][1962]
+http://t.cn/Ai3sAGR7
+*** 新片/经典 end ***
 ```
 
 ## search_movie_6vdy.py
