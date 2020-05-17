@@ -1,13 +1,11 @@
-<!--ts-->
+
 
       * [search_movies 实现方法](#search_movies-实现方法)
       * [Run in Docker](#run-in-docker)
       * [search_movie_maccms.py](#search_movie_maccmspy)
       * [search_movie_6vdy.py](#search_movie_6vdypy)
 
-<!-- Added by: root, at: 2020-05-17T23:31+0800 -->
 
-<!--te-->
 
 ## search_movies 实现方法
 
