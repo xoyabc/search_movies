@@ -51,6 +51,7 @@ do
 		          -H 'content-type: application/json' \
 		          -H 'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36' \
 		          -d "[${i}]")
+			[ $(echo ${result} |jq -r '.ret') -eq 4010 ] && echo "Invalid Token, exit" && exit 0
 			if [ $(echo ${result} |jq -r '.ret') -eq 0 ]
 			then
 				break
