@@ -17,7 +17,7 @@ sys.setdefaultencoding("utf-8")
 import urllib3
 urllib3.disable_warnings()
 
-cinemas = [65567]
+cinemas = [43843]
 
 ticket_headers = {
     'user-agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36",
@@ -63,7 +63,7 @@ def get_movie_detailed_info():
         schedule_movies = schedule_data['data']['movies']
         for movie in schedule_movies:
             duration = movie['duration']
-            #name = movie['name']
+            movie_name = movie['name']
             poster = movie['poster']
             director = movie['director'].replace(', ','/')
             shows = movie['shows']
@@ -74,7 +74,7 @@ def get_movie_detailed_info():
             #print shows
             for k, v in shows.iteritems():
                 for show in v:
-                    name = show['version']
+                    name = show['version'].replace(' 原版 2D', '') if '影展' in movie_name else movie_name
                     beginTime = show['beginTime']
                     endTime = show['endTime']
                     #showDate = show['showDate'].replace('-','/')
