@@ -62,29 +62,30 @@ def get_movie_detailed_info():
         cinema_name = schedule_data['data']['name']
         schedule_movies = schedule_data['data']['movies']
         for movie in schedule_movies:
-            duration = movie['duration']
             movie_name = movie['name']
-            poster = movie['poster']
-            director = movie['director'].replace(', ','/')
-            shows = movie['shows']
-            movie_id = movie['id']
-            movie_data = get_movie_info(movie_id)
-            shot_year = 'N/A' if movie_data['data']['date'] == '' else movie_data['data'].get('date', 'N/A').split('-')[0]
-            country = 'N/A' if movie_data['data']['country'] == '' else movie_data['data'].get('country', 'N/A').replace(', ','/')
-            #print shows
-            for k, v in shows.iteritems():
-                for show in v:
-                    name = show['version'].replace(' 原版 2D', '') if '影展' in movie_name else movie_name
-                    beginTime = show['beginTime']
-                    endTime = show['endTime']
-                    #showDate = show['showDate'].replace('-','/')
-                    showDate_list = show['showDate'].split('-')
-                    showDate = "{0}月{1}日" .format(showDate_list[1], showDate_list[2])
-                    movie_info = "{0}\t{1}\t{2}-{3}\t{4}\t{5}\t{6}\t{7}\t{8}" .format(name,showDate,beginTime,endTime,cinema_name,director,shot_year,country,poster)
-                    movie_info_list.append(movie_info)
-                    print movie_info
-            #sys.exit(0)
-            #print cinema_name,duration,name,poster,director
+            if '影展' in movie_name:
+                duration = movie['duration']
+                poster = movie['poster']
+                director = movie['director'].replace(', ','/')
+                shows = movie['shows']
+                movie_id = movie['id']
+                movie_data = get_movie_info(movie_id)
+                shot_year = 'N/A' if movie_data['data']['date'] == '' else movie_data['data'].get('date', 'N/A').split('-')[0]
+                country = 'N/A' if movie_data['data']['country'] == '' else movie_data['data'].get('country', 'N/A').replace(', ','/')
+                #print shows
+                for k, v in shows.iteritems():
+                    for show in v:
+                        name = show['version'].replace(' 原版 2D', '') if '影展' in movie_name else movie_name
+                        beginTime = show['beginTime']
+                        endTime = show['endTime']
+                        #showDate = show['showDate'].replace('-','/')
+                        showDate_list = show['showDate'].split('-')
+                        showDate = "{0}月{1}日" .format(showDate_list[1], showDate_list[2])
+                        movie_info = "{0}\t{1}\t{2}-{3}\t{4}\t{5}\t{6}\t{7}\t{8}" .format(name,showDate,beginTime,endTime,cinema_name,director,shot_year,country,poster)
+                        movie_info_list.append(movie_info)
+                        print movie_info
+                #sys.exit(0)
+                #print cinema_name,duration,name,poster,director
             time.sleep(1 + random.randint(1, 3))  
     return movie_info_list
 
