@@ -52,7 +52,6 @@ def get_movie_detailed_info():
         for movie in schedule_movies:
             duration = movie['duration']
             name = movie['movie_name']
-            desc = movie['movie_desc']
             shows = movie['shows']
             for k, v in shows.iteritems():
                 for show in v:
@@ -60,17 +59,17 @@ def get_movie_detailed_info():
                     endTime = show['end_time']
                     showDate_list = k.split('-')               
                     showDate = "{0}月{1}日" .format(showDate_list[1], showDate_list[2])
-                    movie_info = "{0}\t{1}\t{2}-{3}\t{4}\t{5}" \
-                                 .format(name,showDate,beginTime,endTime,cinema_name,desc)
+                    movie_info = "{0}\t{1}\t{2}-{3}\t{4}" \
+                                 .format(name,showDate,beginTime,endTime,cinema_name)
                     movie_info_list.append(movie_info)
                     print movie_info
-            time.sleep(1 + random.randint(1, 3))
+        time.sleep(1 + random.randint(1, 3))
     return movie_info_list
 
 
 if __name__ == '__main__':
     # write to movie.csv
     f_csv = 'movie.csv'
-    head_instruction = "film\tdate\ttime\ttheater\tdesc"
+    head_instruction = "film\tdate\ttime\ttheater"
     movie_info_list = get_movie_detailed_info()
     write_to_csv(f_csv, head_instruction, *movie_info_list)
