@@ -56,8 +56,8 @@ def get_movie_info(schedule_data,cinema_name):
         showDate = "{0}月{1}日" .format(showDate_list[0], showDate_list[1])
         # multi show in one day
         for show in scheduleVos:
-            #name = show.get('showVersion', "N/A")
-            name = show['showVersion'].replace(' 原版 2D', '').replace(' ', '') if '影展' in movie_name else movie_name
+            #name = show['showVersion'].replace(' 原版 2D', '').replace(' ', '') if '影展' in movie_name else movie_name
+            name = re.sub(r'(\s+.*\s+2D|\))', '', show['showVersion']) if re.search(pattern, movie_name) else movie_name
             beginTime = show['openTime']
             endTime = show['closeTime']
             movie_info = "{0}\t{1}\t{2}-{3}\t{4}" .format(name,showDate,beginTime,endTime,cinema_name)
@@ -76,7 +76,8 @@ def get_movie_detailed_info(All=False):
         if All:
             get_movie_info(v, cinema_name)
         else:
-            if '影展' in movie_name:
+            #if '影展' in movie_name or '片展' in movie_name:
+            if re.search(pattern, movie_name):
                 get_movie_info(v, cinema_name)
     return movie_info_list
 
@@ -84,6 +85,8 @@ def get_movie_detailed_info(All=False):
 if __name__ == '__main__':
     data = json_load_from_file()
     movie_info_list = []
+    # 影展: '\u5f71\u5c55' 片展: '\u7247\u5c55'
+    pattern=re.compile(ur'([\u5f71\u5c55]+|[\u7247\u5c55]+)')   
     # write to movie.csv
     f_csv = 'movie.csv'
     head_instruction = "film\tdate\ttime\ttheater"
