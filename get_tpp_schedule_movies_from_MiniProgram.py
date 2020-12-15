@@ -28,12 +28,14 @@ def write_to_csv(filename, head_line, *info_list):
             writer.writerow(row_list)
 
 
+# convert to json format
 def json_load_from_file():
     with open("movie.json", 'rU') as f:
         data = json.load(f)
         return data['data']['returnValue']
 
 
+# get id and Name relationship
 def get_show_info():
     showVos = data['showVos']
     show_infos = {}
@@ -46,66 +48,48 @@ def get_show_info():
     return show_infos
 
 
-def get_movie_detailed_info():
-    movie_info_list = []
-    showScheduleMap = data['showScheduleMap']
-    shows_data = get_show_info()
-    cinema_name = data['cinemaVo']['cinemaName']
-    for k, v in showScheduleMap.iteritems():
-        movie_id = k
-        movie_name = shows_data[movie_id]['showName']
-        if '影展' in movie_name:
-            # one day
-            for i in v: 
-                scheduleVos = i['scheduleVos']
-                showDate_list = i['dateTip'].split()[1].split('-')
-                showDate = "{0}月{1}日" .format(showDate_list[0], showDate_list[1])
-                # multi show in one day
-                for show in scheduleVos:
-                    #name = show.get('showVersion', "N/A")
-                    name = show['showVersion'].replace(' 原版 2D', '').replace(' ', '') if '影展' in movie_name else movie_name
-                    beginTime = show['openTime']
-                    endTime = show['closeTime']
-                    movie_info = "{0}\t{1}\t{2}-{3}\t{4}" .format(name,showDate,beginTime,endTime,cinema_name)
-                    movie_info_list.append(movie_info)
-                    print movie_info
-    return movie_info_list
+def get_movie_info(schedule_data,cinema_name):
+    # one day
+    for i in schedule_data: 
+        scheduleVos = i['scheduleVos']
+        showDate_list = i['dateTip'].split()[1].split('-')
+        showDate = "{0}月{1}日" .format(showDate_list[0], showDate_list[1])
+        # multi show in one day
+        for show in scheduleVos:
+            #name = show.get('showVersion', "N/A")
+            name = show['showVersion'].replace(' 原版 2D', '').replace(' ', '') if '影展' in movie_name else movie_name
+            beginTime = show['openTime']
+            endTime = show['closeTime']
+            movie_info = "{0}\t{1}\t{2}-{3}\t{4}" .format(name,showDate,beginTime,endTime,cinema_name)
+            movie_info_list.append(movie_info)
+            print movie_info
+    
 
-def get_all_movie_detailed_info():
-    movie_info_list = []
+def get_movie_detailed_info(All=False):
+    global movie_name
     showScheduleMap = data['showScheduleMap']
     shows_data = get_show_info()
     cinema_name = data['cinemaVo']['cinemaName']
     for k, v in showScheduleMap.iteritems():
         movie_id = k
         movie_name = shows_data[movie_id]['showName']
-        # one day
-        for i in v: 
-            scheduleVos = i['scheduleVos']
-            showDate_list = i['dateTip'].split()[1].split('-')
-            showDate = "{0}月{1}日" .format(showDate_list[0], showDate_list[1])
-            # multi show in one day
-            for show in scheduleVos:
-                #name = show.get('showVersion', "N/A")
-                name = show['showVersion'].replace(' 原版 2D', '').replace(' ', '') if '影展' in movie_name else movie_name
-                beginTime = show['openTime']
-                endTime = show['closeTime']
-                movie_info = "{0}\t{1}\t{2}-{3}\t{4}" .format(name,showDate,beginTime,endTime,cinema_name)
-                movie_info_list.append(movie_info)
-                print movie_info
+        if All:
+            get_movie_info(v, cinema_name)
+        else:
+            if '影展' in movie_name:
+                get_movie_info(v, cinema_name)
     return movie_info_list
 
 
 if __name__ == '__main__':
     data = json_load_from_file()
+    movie_info_list = []
     # write to movie.csv
     f_csv = 'movie.csv'
     head_instruction = "film\tdate\ttime\ttheater"
-    print sys.argv
-    print len(sys.argv)
     if len(sys.argv) > 1:
         if sys.argv[1] == 'all':
-            movie_info_list = get_all_movie_detailed_info()
+            movie_info_list = get_movie_detailed_info(All=True)
     else:
         movie_info_list = get_movie_detailed_info()
     write_to_csv(f_csv, head_instruction, *movie_info_list)
