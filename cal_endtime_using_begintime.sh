@@ -5,7 +5,7 @@ do
         #start_time="14:30"
         #duration_min="150"
         start_time=$(echo ${line} |awk '{print $1}')
-        duration_min=$(echo ${line} |awk '{print $2}')
+        duration_min=$(echo ${line} |awk '{cond=0}$2~/(H|M)/{split($2,a,"H|M");print a[1]*60+a[2];cond=1}!cond{print $2}')
         duration_sec=$(echo $((60*${duration_min})))
         #echo ${duration_sec}
 
