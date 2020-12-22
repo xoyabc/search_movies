@@ -31,7 +31,8 @@ def write_to_csv(filename, head_line, *info_list):
 # convert to json format
 def json_load_from_file(filename):
     with open(filename, 'rU') as f:
-        data = json.load(f)
+        dataStr = f.read().replace('mtopjsonp2(', '').replace(')', '')
+        data = json.loads(dataStr)
         return data['data']['returnValue']
 
 
@@ -84,7 +85,7 @@ def get_movie_detailed_info(All=False):
 
 if __name__ == '__main__':
     f = "movie.json"
-    data = json_load_from_file()
+    data = json_load_from_file(f)
     movie_info_list = []
     # 影展: '\u5f71\u5c55' 片展: '\u7247\u5c55'
     pattern=re.compile(ur'([\u5f71\u5c55]+|[\u7247\u5c55]+)')   
