@@ -31,7 +31,7 @@ def write_to_csv(filename, head_line, *info_list):
 # convert to json format
 def json_load_from_file(filename):
     with open(filename, 'rU') as f:
-        dataStr = f.read().replace('mtopjsonp2(', '').replace(')', '')
+        dataStr = f.read().replace('mtopjsonp2(', '').replace('mtopjsonp3(', '').replace(')', '')
         data = json.loads(dataStr)
         return data['data']['returnValue']
 
