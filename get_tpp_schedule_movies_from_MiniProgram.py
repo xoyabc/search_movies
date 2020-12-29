@@ -88,7 +88,7 @@ if __name__ == '__main__':
     data = json_load_from_file(f)
     movie_info_list = []
     # 影展: '\u5f71\u5c55' 片展: '\u7247\u5c55'
-    pattern=re.compile(ur'([\u5f71\u5c55]+|[\u7247\u5c55]+)')   
+    pattern=re.compile(ur'([\u5f71\u5c55]{2,}|[\u7247\u5c55]{2,})')   
     # write to movie.csv
     f_csv = 'movie.csv'
     head_instruction = "film\tdate\ttime\ttheater"
