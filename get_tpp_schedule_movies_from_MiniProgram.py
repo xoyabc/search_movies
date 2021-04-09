@@ -60,7 +60,8 @@ def get_movie_info(schedule_data,cinema_name):
         # multi show in one day
         for show in scheduleVos:
             #name = show['showVersion'].replace(' 原版 2D', '').replace(' ', '') if '影展' in movie_name else movie_name
-            name = re.sub(r'(\s+[^ ]*\s+2D|\)|\s+)', '', show['showVersion']) if re.search(pattern, movie_name) else movie_name
+            # remove ' 原版 2D' and ' 原版2D'
+            name = re.sub(r'(\s+[^ ]*\s*2D|\)|\s+)', '', show['showVersion']) if re.search(pattern, movie_name) else movie_name
             beginTime = show['openTime']
             endTime = show['closeTime']
             movie_info = "{0}\t{1}\t{2}-{3}\t{4}" .format(name,showDate,beginTime,endTime,cinema_name)
