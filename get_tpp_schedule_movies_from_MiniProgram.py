@@ -31,8 +31,10 @@ def write_to_csv(filename, head_line, *info_list):
 # convert to json format
 def json_load_from_file(filename):
     with open(filename, 'rU') as f:
-        dataStr = f.read().replace('mtopjsonp2(', '').replace('mtopjsonp3(', '').replace(')', '')
-        data = json.loads(dataStr)
+        dataStr = f.read().replace('mtopjsonp2(', '').replace('mtopjsonp3(', '')
+        # remove last ")"
+        dataStr_new = re.sub(r'\)$', r'', dataStr)
+        data = json.loads(dataStr_new)
         return data['data']['returnValue']
 
 
@@ -86,6 +88,7 @@ def get_movie_detailed_info(All=False):
 if __name__ == '__main__':
     f = "movie.json"
     data = json_load_from_file(f)
+    cinema_id = data['cinemaVo']['cinemaId']
     movie_info_list = []
     # 影展: '\u5f71\u5c55' 片展: '\u7247\u5c55'
     pattern=re.compile(ur'([\u5f71\u5c55]{2,}|[\u7247\u5c55]{2,})')   
@@ -96,5 +99,10 @@ if __name__ == '__main__':
         if sys.argv[1] == 'all':
             movie_info_list = get_movie_detailed_info(All=True)
     else:
-        movie_info_list = get_movie_detailed_info()
+        # 资料馆小西天、百子湾店获取所有排片
+        if cinema_id in ['45797', '45798']:
+            movie_info_list = get_movie_detailed_info(All=True)
+        # 其他影院获取影展排片
+        else:
+            movie_info_list = get_movie_detailed_info()
     write_to_csv(f_csv, head_instruction, *movie_info_list)
