@@ -92,7 +92,12 @@ if __name__ == '__main__':
     cinema_id = data['cinemaVo']['cinemaId']
     movie_info_list = []
     # 影展: '\u5f71\u5c55' 片展: '\u7247\u5c55'
-    pattern=re.compile(ur'([\u5f71\u5c55]{2,}|[\u7247\u5c55]{2,})')   
+    #pattern=re.compile(ur'([\u5f71\u5c55]{2,}|[\u7247\u5c55]{2,})')   
+    # 匹配各类影展标题
+    # 电影展/影像展 新片展 大师展 电影周  作品展  纪念展 电影季 回顾展 
+    # 专题展 特展 特别放映 纪念专场 修复展 电影节 展映/展映周
+    # ([影片师特题展]|作品|纪念|回顾|修复){1,}.*?([展周季节映]|专场|放映){1,}
+    pattern=re.compile(ur'([\u5f71\u7247\u5e08\u7279\u9898\u5c55]|\u4f5c\u54c1|\u7eaa\u5ff5|\u56de\u987e|\u4fee\u590d){1,}.*?([\u5c55\u5468\u5b63\u8282\u6620]|\u4e13\u573a|\u653e\u6620){1,}')
     # write to movie.csv
     f_csv = 'movie.csv'
     head_instruction = "film\tdate\ttime\ttheater"
