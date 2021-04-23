@@ -84,13 +84,13 @@ def get_movie_info(all_result, movie_year):
         if not movie_year:
             if name == keyword:
                 #movie_msg = "{} {} {} {}".format(name, year, real_link, tiny_link)
-                movie_msg = "[{}][{}]\n{}".format(name, year, tiny_link)
+                movie_msg = "[{}][{}]\n{}".format(name, year, real_link)
                 return movie_msg
                 break
         else:
             if name == keyword and int(movie_year) == int(year):
                 #movie_msg = "{} {} {} {}".format(name, year, real_link, tiny_link)
-                movie_msg = "[{}][{}]\n{}".format(name, year, tiny_link)
+                movie_msg = "[{}][{}]\n{}".format(name, year, real_link)
                 return movie_msg
                 break
 
