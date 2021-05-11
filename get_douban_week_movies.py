@@ -76,6 +76,7 @@ def gen_short_url(long_url):
     long_url = quote_plus(long_url)
     url = "https://www.98api.cn/api/sinaDwz.php"
     payload = {'url': long_url}
+    short_link = None
     try:
         #resp = requests.get(url, params=payload)
         resp = requests.get(url, params=payload, headers=tiny_headers, verify=False)
@@ -254,7 +255,7 @@ def get_db_mv_week():
                 print i.a['href'],name,year
                 content = str(search_maccms(name, year)) + "\n" if search_maccms(name, year) else ''
                 contents.append(content)
-                time.sleep(105 + random.randint(1, 5))
+                time.sleep(55 + random.randint(1, 5))
             # 查找成功且短链生成后将日期及链接写入到文件
             save_file(douban_weekly_movies, cur_date + ' ' + str(link))
     send_msg = MESSAGE.format("".join(contents))
