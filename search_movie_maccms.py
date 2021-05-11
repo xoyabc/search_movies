@@ -17,7 +17,7 @@ urllib3.disable_warnings()
 '''
 
 file = 'movie.name'
-url = "http://vowys.xyz/index.php"
+url = "https://vowys.xyz/index.php"
 base_url = "https://vowys.xyz"
 
 # 请求参数
@@ -84,13 +84,13 @@ def get_movie_info(all_result, movie_year):
         if not movie_year:
             if name == keyword:
                 #movie_msg = "{} {} {} {}".format(name, year, real_link, tiny_link)
-                movie_msg = "[{}][{}]\n{}".format(name, year, tiny_link)
+                movie_msg = "[{}][{}]\n{}".format(name, year, real_link)
                 return movie_msg
                 break
         else:
             if name == keyword and int(movie_year) == int(year):
                 #movie_msg = "{} {} {} {}".format(name, year, real_link, tiny_link)
-                movie_msg = "[{}][{}]\n{}".format(name, year, tiny_link)
+                movie_msg = "[{}][{}]\n{}".format(name, year, real_link)
                 return movie_msg
                 break
 
@@ -109,7 +109,7 @@ def search_maccms(name, year = None):
     #payload = "wd=%E7%96%BE%E9%80%9F%E5%A4%87%E6%88%98"
     payload = "wd={}".format(keyword)
     #print payload, querystring
-    response = requests.request("POST", url, data=payload, headers=headers, params=querystring)
+    response = requests.request("POST", url, data=payload, headers=headers, params=querystring, verify=False)
     html = response.text
     soup = BeautifulSoup(html.encode('utf-8'), "html.parser")
     all_result = soup.select('div[class="channel b"] > ul > li')[0:10]
