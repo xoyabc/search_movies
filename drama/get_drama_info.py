@@ -117,7 +117,7 @@ def myLog():
     return log
 
 
-# store the movie info to file
+# store the drama info to file
 def store_to_file(f,**DICT):
     fd = open(f, 'w')
     try:
@@ -315,14 +315,14 @@ def get_shows_info(performanceId):
 
 def get_drama_base_info(url):
     # request
-    movie_infos['error'] = None
+    drama_infos['error'] = None
     if not get_one(url):
-        movie_infos['error'] = 'request error'
-        return movie_infos
+        drama_infos['error'] = 'request error'
+        return drama_infos
     json_data = get_one(url)
-    movie_infos['info'] = json_data['data']
-    movie_infos['totalHits'] = 0 if json_data['paging'] == None else json_data['paging']['totalHits']
-    return movie_infos
+    drama_infos['info'] = json_data['data']
+    drama_infos['totalHits'] = 0 if json_data['paging'] == None else json_data['paging']['totalHits']
+    return drama_infos
 
 
 def get_drama_city_info(categoryId, cityId):
@@ -339,8 +339,8 @@ def get_drama_city_info(categoryId, cityId):
         try:
             data = get_drama_base_info(url)
             if data['error'] is not None:
-                movie_info = "{0}\t{1}" .format(url,data['error'])
-                movie_info_list.append(movie_info)
+                drama_info = "{0}\t{1}" .format(url,data['error'])
+                drama_info_list.append(drama_info)
             else:
                 #for show in data['info'][3:5]:
                 for show in data['info']:
@@ -369,19 +369,19 @@ def get_drama_city_info(categoryId, cityId):
                           priceOptions = prices
                           )
                     shows.append(info)
-                    movie_info = "{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}\t{11}" \
+                    drama_info = "{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}\t{11}" \
                                 .format(
                                     page, performanceId,
                                     city, category,
                                     name, shopName, showTimeRange,
                                     date_Range, priceRange, startTimes, 
                                     prices, posterUrl)
-                    movie_info_list.append(movie_info)
+                    drama_info_list.append(drama_info)
                     random_sleep(1, 3)
         except Exception:
-            movie_info = "{0}\tinternal_running_error" .format(url)
-            movie_info_list.append(movie_info)
-        #print movie_info_list
+            drama_info = "{0}\tinternal_running_error" .format(url)
+            drama_info_list.append(drama_info)
+        #print drama_info_list
         sleeptime = random.uniform(0, 3)
         sleeptime = Decimal(sleeptime).quantize(Decimal('0.00'))
         time.sleep(sleeptime)
@@ -420,7 +420,7 @@ def get_all_drama_info():
             print (json.dumps(RESULT))
             store_to_file(f_result, **RESULT)
             post_data(json.dumps(RESULT))
-    return movie_info_list
+    return drama_info_list
 
     
 # create log dir
@@ -439,12 +439,12 @@ if __name__ == '__main__':
     categoryId = 4
     #categoryId = 0
     cityId = 1
-    movie_infos = {}
-    movie_info_list = []
+    drama_infos = {}
+    drama_info_list = []
     appKey = "2_mvls9gege00l"
     data_category = get_category_info(f_category)
     data_city = get_city_info(f_city)
     head_instruction = "page\tperformanceId\tcity\tcategory\tname\tshopName\tshowTimeRange\tdate_Range\tpriceRange\ttimeOptions\tpriceOptions\tposterUrl"
-    #movie_info_list = get_drama_city_info(categoryId, cityId)
-    movie_info_list = get_all_drama_info()
-    write_to_csv(f_csv, head_instruction, *movie_info_list)
+    #drama_info_list = get_drama_city_info(categoryId, cityId)
+    drama_info_list = get_all_drama_info()
+    write_to_csv(f_csv, head_instruction, *drama_info_list)
