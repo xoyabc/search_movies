@@ -27,6 +27,7 @@ urllib3.disable_warnings()
 BASEPATH = os.path.realpath(os.path.dirname(__file__))
 LOGPATH = BASEPATH + os.sep + 'log'
 LOGFILE = LOGPATH + os.sep + 'post_data.log'
+CSVPATH = BASEPATH + os.sep + 'csv'
 
 
 # header content
@@ -140,6 +141,13 @@ def _to_timestamp(dt):
     timeArray = time.strptime(dt, "%Y.%m.%d")   
     ts = time.mktime(timeArray)
     return ts
+
+
+# convert timestamp to date
+def _to_date(ts):
+    timeArray = time.localtime(ts)  
+    dt = time.strftime("%Y%m%d", timeArray)
+    return dt
 
 
 def get_start_end_time(t):
@@ -342,7 +350,7 @@ def get_drama_city_info(categoryId, cityId):
                 drama_info = "{0}\t{1}" .format(url,data['error'])
                 drama_info_list.append(drama_info)
             else:
-                #for show in data['info'][3:5]:
+                #for show in data['info'][2:4]:
                 for show in data['info']:
                     performanceId = show['performanceId']
                     city = data_city[cityId]
@@ -407,9 +415,9 @@ def get_all_drama_info():
     print "city_list: {}" .format(city_list)
     print "category_list: {}" .format(category_list)
     #for i in city_list[0:4]:
-    for i in [10]:
-    #for i in city_list:
-        #for j in category_list[0:4]:
+    #for i in [10]:
+    for i in city_list:
+    #for j in category_list[0:4]:
         #for j in [9]:
         for j in [1, 2, 3, 4, 5, 6, 9]:
             RESULT = {}
@@ -418,22 +426,26 @@ def get_all_drama_info():
             RESULT['category'] = data_category[j]
             RESULT['appKey'] = appKey
             print (json.dumps(RESULT))
-            store_to_file(f_result, **RESULT)
+            #store_to_file(f_result, **RESULT)
             post_data(json.dumps(RESULT))
     return drama_info_list
 
     
-# create log dir
+# create log and csv dir
 if not os.path.isdir(LOGPATH):
     os.makedirs(LOGPATH, 0755)
-mylog = myLog()
+if not os.path.isdir(CSVPATH):
+    os.makedirs(CSVPATH, 0755)
 
 if __name__ == '__main__':
+    mylog = myLog()
+    ts_today = int(time.time())
+    date_today = _to_date(ts_today)
+    CSVFILE = CSVPATH + os.sep + 'drama-{0}.csv' .format(date_today)
     f_category = 'category_info'
     f_city = 'city_info'
-    f_csv = 'drama.csv'
+    #f_csv = 'drama.csv'
     f_result='drama_info'
-    ts_today = int(time.time())
     # city: 4 北京 0 上海
     # categoryId: 0 全部 4 话剧/歌剧
     categoryId = 4
@@ -447,4 +459,4 @@ if __name__ == '__main__':
     head_instruction = "page\tperformanceId\tcity\tcategory\tname\tshopName\tshowTimeRange\tdate_Range\tpriceRange\ttimeOptions\tpriceOptions\tposterUrl"
     #drama_info_list = get_drama_city_info(categoryId, cityId)
     drama_info_list = get_all_drama_info()
-    write_to_csv(f_csv, head_instruction, *drama_info_list)
+    write_to_csv(CSVFILE, head_instruction, *drama_info_list)
