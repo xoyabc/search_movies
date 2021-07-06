@@ -127,7 +127,8 @@ def get_detailed_schedule_info(schedule_data):
         print cinema_name,duration,name,movieHall,poster,director
         print movie_info
 
-def get_movie_detailed_info():
+
+def get_movie_detailed_info(start_day):
     ts_start_day = _to_timestamp(start_day)
     ts_end_day = ts_start_day + 31*24*60*60
     while ts_start_day <= ts_end_day:
@@ -139,11 +140,29 @@ def get_movie_detailed_info():
         ts_start_day += 86400
     return movie_info_list
 
+
+def get_schedule_list():
+    # execute on the last 6 days of every month to get the movie schedule of next month
+    ts_today = int(time.time())
+    for i in xrange(6, 0, -1):
+        ts = ts_today + i * 86400
+        year = _to_day(ts).split('/')[0]
+        mon = _to_day(ts).split('/')[1]
+        day = _to_day(ts).split('/')[-1]
+        day_num = int(day)
+        if day_num == 13:
+            s_day = "{0}-{1}-{2} 00:00:00" .format(year, mon, day)
+            movie_info_list = get_movie_detailed_info(s_day)
+            write_to_csv(f_csv, head_instruction, *movie_info_list)
+
+
 if __name__ == '__main__':
+    #start_day = "2021-07-30 00:00:00"
     movie_info_list = []
-    start_day = "2021-07-01 00:00:00"
     # write to movie.csv
     f_csv = "movie.csv"
     head_instruction = "film\tdate\ttime\tweek\tduration\ttheater\tmovieHall\tdirector\tcountry\tsubtitle\tprojection_material\tframeRatio"
-    movie_info_list = get_movie_detailed_info()
-    write_to_csv(f_csv, head_instruction, *movie_info_list)
+    #movie_info_list = get_movie_detailed_info(start_day)
+    #write_to_csv(f_csv, head_instruction, *movie_info_list)
+    #sys.exit(0)
+    get_schedule_list()
