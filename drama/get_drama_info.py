@@ -216,6 +216,7 @@ def get_city_info(filename):
         cityId = v['id']
         city_nm = v['nm']
         city_info[cityId] = city_nm
+    print "city_info: {}" .format(city_info)
     return city_info
 
 
@@ -355,6 +356,7 @@ def get_drama_city_info(categoryId, cityId):
                     performanceId = show['performanceId']
                     city = data_city[cityId]
                     category = data_category[categoryId]
+                    cityName = show['cityName']
                     name = show['name'].replace('\t', '')
                     shopName = show['shopName']
                     showTimeRange = show['showTimeRange']
@@ -376,15 +378,16 @@ def get_drama_city_info(categoryId, cityId):
                           timeOptions = startTimes,
                           priceOptions = prices
                           )
-                    shows.append(info)
-                    drama_info = "{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}\t{11}" \
+                    drama_info = "{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}\t{11}\t{12}" \
                                 .format(
                                     page, performanceId,
                                     city, category,
                                     name, shopName, showTimeRange,
                                     date_Range, priceRange, startTimes, 
-                                    prices, posterUrl)
-                    drama_info_list.append(drama_info)
+                                    prices, url, posterUrl)
+                    if cityName.lower() == city:
+                        shows.append(info)
+                        drama_info_list.append(drama_info)
                     random_sleep(1, 3)
         except Exception:
             drama_info = "{0}\tinternal_running_error" .format(url)
@@ -415,10 +418,10 @@ def get_all_drama_info():
     print "city_list: {}" .format(city_list)
     print "category_list: {}" .format(category_list)
     #for i in city_list[0:4]:
-    #for i in [10]:
-    for i in city_list:
+    for i in [44]:
+    #for i in city_list:
     #for j in category_list[0:4]:
-        #for j in [9]:
+        #for j in [2]:
         for j in [1, 2, 3, 4, 5, 6, 9]:
             RESULT = {}
             RESULT['shows'] = get_drama_city_info(j, i)
@@ -446,7 +449,7 @@ if __name__ == '__main__':
     f_city = 'city_info'
     #f_csv = 'drama.csv'
     f_result='drama_info'
-    # city: 4 北京 0 上海
+    # city: 1 北京 10 上海
     # categoryId: 0 全部 4 话剧/歌剧
     categoryId = 4
     #categoryId = 0
@@ -456,7 +459,7 @@ if __name__ == '__main__':
     appKey = "2_mvls9gege00l"
     data_category = get_category_info(f_category)
     data_city = get_city_info(f_city)
-    head_instruction = "page\tperformanceId\tcity\tcategory\tname\tshopName\tshowTimeRange\tdate_Range\tpriceRange\ttimeOptions\tpriceOptions\tposterUrl"
+    head_instruction = "page\tperformanceId\tcity\tcategory\tname\tshopName\tshowTimeRange\tdate_Range\tpriceRange\ttimeOptions\tpriceOptions\turl\tposterUrl"
     #drama_info_list = get_drama_city_info(categoryId, cityId)
     drama_info_list = get_all_drama_info()
     write_to_csv(CSVFILE, head_instruction, *drama_info_list)
