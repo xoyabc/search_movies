@@ -404,7 +404,7 @@ def get_drama_city_info(categoryId, cityId):
 def get_all_drama_info():
     '''
     1 演唱会    -- up
-    2 体育赛事  -- up
+    2 体育赛事  -- close on 2021.07.11
     3 戏曲艺术  -- up
     4 话剧/歌剧 -- up
     5 芭蕾舞蹈  -- up
@@ -418,11 +418,11 @@ def get_all_drama_info():
     print "city_list: {}" .format(city_list)
     print "category_list: {}" .format(category_list)
     #for i in city_list[0:4]:
-    for i in [44]:
-    #for i in city_list:
+    #for i in [44]:
+    for i in city_list:
     #for j in category_list[0:4]:
         #for j in [2]:
-        for j in [1, 2, 3, 4, 5, 6, 9]:
+        for j in [1, 3, 4, 5, 6, 9]:
             RESULT = {}
             RESULT['shows'] = get_drama_city_info(j, i)
             RESULT['city'] = data_city[i]
@@ -439,9 +439,9 @@ if not os.path.isdir(LOGPATH):
     os.makedirs(LOGPATH, 0755)
 if not os.path.isdir(CSVPATH):
     os.makedirs(CSVPATH, 0755)
+mylog = myLog()
 
 if __name__ == '__main__':
-    mylog = myLog()
     ts_today = int(time.time())
     date_today = _to_date(ts_today)
     CSVFILE = CSVPATH + os.sep + 'drama-{0}.csv' .format(date_today)
