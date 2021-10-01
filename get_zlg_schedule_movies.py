@@ -105,10 +105,17 @@ def get_detailed_schedule_info(schedule_data):
         duration = movie['movieMinute']
         poster = movie['pictureLittle']
         movieActorList = movie['movieActorList']
-        director = "/" .join([ x['realName'].split()[0].strip() for x in movieActorList \
+        print "movieActorList:{0}" .format(movieActorList)
+        # get all director
+        director_all = "/" .join([ x['realName'].split()[0].strip() for x in movieActorList \
                    if x['position'] == '导演'.decode('utf-8') ])
+        # get the first three director
+        director = "/" .join(director_all.split('/')[0:3])
         movie_data = get_movie_info(movie_id)
-        country = movie_data['regionCategoryName']
+        # get the first three country
+        country = "/" .join(movie_data['regionCategoryName'].split('/')[0:3])
+        print "country:{0}" .format(country)
+        # get date, beginTime, endTime, week
         playTime = movie['playTime']
         showDate_list = movie['playTime'].split()[0].split('-')
         showDate = "{0}月{1}日" .format(showDate_list[1], showDate_list[2])
@@ -145,23 +152,24 @@ def get_schedule_list():
     # execute on the last 6 days of every month to get the movie schedule of next month
     ts_today = int(time.time())
     for i in xrange(6, 0, -1):
+        # timestamp of tomorrow
         ts = ts_today + i * 86400
         year = _to_day(ts).split('/')[0]
         mon = _to_day(ts).split('/')[1]
         day = _to_day(ts).split('/')[-1]
         day_num = int(day)
-        if day_num == 13:
+        if day_num == 1:
             s_day = "{0}-{1}-{2} 00:00:00" .format(year, mon, day)
             movie_info_list = get_movie_detailed_info(s_day)
             write_to_csv(f_csv, head_instruction, *movie_info_list)
 
 
 if __name__ == '__main__':
-    #start_day = "2021-07-30 00:00:00"
     movie_info_list = []
     # write to movie.csv
     f_csv = "movie.csv"
     head_instruction = "film\tdate\ttime\tweek\tduration\ttheater\tmovieHall\tdirector\tcountry\tsubtitle\tprojection_material\tframeRatio"
+    #start_day = "2021-10-22 00:00:00"
     #movie_info_list = get_movie_detailed_info(start_day)
     #write_to_csv(f_csv, head_instruction, *movie_info_list)
     #sys.exit(0)
