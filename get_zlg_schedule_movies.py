@@ -68,7 +68,7 @@ def get_week_day(dt):
 def get_schedule_info(date):
     #millis = int(round(time.time() * 1000))
     cinema_url = 'https://yt.cfa.org.cn/api/movie/movieCinemaList?now={0}&cinemaName=' .format(date)
-    print cinema_url
+    print "cinema_url:{}" .format(cinema_url)
     res = requests.get(cinema_url, headers=ticket_headers, verify=False)
     json_data=res.json()['data']
     #print json_data
@@ -98,7 +98,7 @@ def get_movie_info(m_id):
 def get_detailed_schedule_info(schedule_data):
     for movie in schedule_data:
         movie_id = movie['movieId']
-        print movie_id
+        print "movie_id:{}" .format(movie_id)
         name = movie['movieName']
         cinema_name = movie['cinemaName']
         movieHall = movie['movieHall']
@@ -135,16 +135,39 @@ def get_detailed_schedule_info(schedule_data):
         print movie_info
 
 
+def judge_list_dup_element(list_name, n, v=0):
+    # check if continuous n elements in a list
+    # `n` stand for the number of continuous element
+    # `v` stand for the value of dup element
+    for i in xrange(len(list_name)-n+1):
+        if list_name[i] == v and len(list(set(list_name[i:i+n]))) == 1:
+            return True
+            break
+    return False
+
+
 def get_movie_detailed_info(start_day):
     ts_start_day = _to_timestamp(start_day)
     ts_end_day = ts_start_day + 31*24*60*60
+    cnt = 0
+    schedule_list = []
     while ts_start_day <= ts_end_day:
         date = _to_day(ts_start_day)
         schedule_data = get_schedule_info(date)
+        # stop once there are no shows for 3 consecutive days
+        if judge_list_dup_element(schedule_list, 3, 0):
+            break
         if len(schedule_data) > 0:
             get_detailed_schedule_info(schedule_data)
+            # set element to 1 if there are shows
+            schedule_list.insert(cnt, 1)
+        else:
+            # set element to 0 if there are no shows
+            schedule_list.insert(cnt, 0)
+        #print (schedule_list)
         time.sleep(1 + random.randint(1, 3))  
         ts_start_day += 86400
+        cnt += 1
     return movie_info_list
 
 
@@ -169,7 +192,7 @@ if __name__ == '__main__':
     # write to movie.csv
     f_csv = "movie.csv"
     head_instruction = "film\tdate\ttime\tweek\tduration\ttheater\tmovieHall\tdirector\tcountry\tsubtitle\tprojection_material\tframeRatio"
-    #start_day = "2021-10-22 00:00:00"
+    #start_day = "2021-11-13 00:00:00"
     #movie_info_list = get_movie_detailed_info(start_day)
     #write_to_csv(f_csv, head_instruction, *movie_info_list)
     #sys.exit(0)
