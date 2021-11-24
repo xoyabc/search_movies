@@ -164,7 +164,7 @@ def get_movie_detailed_info(start_day):
         else:
             # set element to 0 if there are no shows
             schedule_list.insert(cnt, 0)
-        #print (schedule_list)
+        print (schedule_list)
         time.sleep(1 + random.randint(1, 3))  
         ts_start_day += 86400
         cnt += 1
@@ -174,7 +174,7 @@ def get_movie_detailed_info(start_day):
 def get_schedule_list():
     # execute on the last 6 days of every month to get the movie schedule of next month
     ts_today = int(time.time())
-    for i in xrange(6, 0, -1):
+    for i in xrange(7, 0, -1):
         # timestamp of tomorrow
         ts = ts_today + i * 86400
         year = _to_day(ts).split('/')[0]
@@ -190,7 +190,8 @@ def get_schedule_list():
 if __name__ == '__main__':
     movie_info_list = []
     # write to movie.csv
-    f_csv = "movie.csv"
+    BASEPATH = os.path.realpath(os.path.dirname(__file__))
+    f_csv = BASEPATH + os.sep + 'movie.csv'
     head_instruction = "film\tdate\ttime\tweek\tduration\ttheater\tmovieHall\tdirector\tcountry\tsubtitle\tprojection_material\tframeRatio"
     #start_day = "2021-11-13 00:00:00"
     #movie_info_list = get_movie_detailed_info(start_day)
