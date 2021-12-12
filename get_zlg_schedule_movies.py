@@ -3,6 +3,7 @@
 
 import re 
 import sys 
+import os
 import urllib 
 import requests
 import random
@@ -184,7 +185,8 @@ def get_schedule_list():
         if day_num == 1:
             s_day = "{0}-{1}-{2} 00:00:00" .format(year, mon, day)
             movie_info_list = get_movie_detailed_info(s_day)
-            write_to_csv(f_csv, head_instruction, *movie_info_list)
+            # add file suffix
+            write_to_csv(f_csv+'.'+year+mon, head_instruction, *movie_info_list)
 
 
 if __name__ == '__main__':
@@ -193,7 +195,7 @@ if __name__ == '__main__':
     BASEPATH = os.path.realpath(os.path.dirname(__file__))
     f_csv = BASEPATH + os.sep + 'movie.csv'
     head_instruction = "film\tdate\ttime\tweek\tduration\ttheater\tmovieHall\tdirector\tcountry\tsubtitle\tprojection_material\tframeRatio"
-    #start_day = "2021-11-13 00:00:00"
+    #start_day = "2021-12-29 00:00:00"
     #movie_info_list = get_movie_detailed_info(start_day)
     #write_to_csv(f_csv, head_instruction, *movie_info_list)
     #sys.exit(0)
