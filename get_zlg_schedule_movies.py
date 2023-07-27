@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.7
 # -*- coding: utf-8 -*-
+# 2023/07/15: add lasting_days
 
 import re 
 import sys 
@@ -68,7 +69,8 @@ def get_week_day(dt):
 
 def get_schedule_info(date):
     #millis = int(round(time.time() * 1000))
-    cinema_url = 'https://yt5.cfa.org.cn/api/movie/movieCinemaList?now={0}&cinemaName=' .format(date)
+    #cinema_url = 'https://yt.cfa.org.cn/api/movie/movieCinemaList?now={0}&cinemaName=' .format(date)
+    cinema_url = 'https://yt5.cfa.org.cn/v5/api/movie/movieCinemaList?now={0}&cinemaName=' .format(date)
     print "cinema_url:{}" .format(cinema_url)
     res = requests.get(cinema_url, headers=ticket_headers, verify=False)
     json_data=res.json()['data']
@@ -80,18 +82,17 @@ def get_schedule_info(date):
 
 def get_movie_info(m_id):
     movie_info = {}
-    movie_url = 'https://yt5.cfa.org.cn/api/movie/movieInfo/{0}?userId=' .format(m_id)  
+    #movie_url = 'https://yt.cfa.org.cn/api/movie/movieInfo/{0}?userId=' .format(m_id)  
+    movie_url = 'https://yt5.cfa.org.cn/v5/api/movie/movieInfo/{0}?userId=' .format(m_id)  
     res = requests.get(movie_url, headers=ticket_headers, verify=False)
     json_data=res.json()['data']
     # 国家/地区
     movie_info['regionCategoryName'] = "/" .join([ x['categoryName'] for x in json_data['regionCategoryNameList'] ])
-    # 语言
-    movie_info['languageCategoryName'] = "/" .join([ x['categoryName'] for x in json_data['languageCategoryNameList'] ])
     # 字幕
     movie_info['subtitle'] = '未标注' if len(json_data['subtitle']) == 0 else json_data['subtitle'][0] 
     # 版本 DCP
     #movie_info['projection_material'] = 'N/A' if json_data['movieCinemaList'][0]['node'] == '' else json_data['movieCinemaList'][0]['node'].split('"')[1]
-    movie_info['projection_material'] = 'N/A' if json_data['movieCinemaList'][0]['nodeNameList'] == '' else json_data['movieCinemaList'][0]['nodeNameList'][0]
+    movie_info['projection_material'] = 'N/A' if json_data['movieCinemaList'][0]['nodeNameList'] == '' else json_data['movieCinemaList'][0]['nodeNameList'][-1]
     # 画面效果
     movie_info['framesCategoryName'] = 'N/A' if json_data['framesCategoryName']  == '' else json_data['framesCategoryName']
     # 画幅比
@@ -119,9 +120,6 @@ def get_detailed_schedule_info(schedule_data):
         # get the first three country
         country = "/" .join(movie_data['regionCategoryName'].split('/')[0:3])
         print "country:{0}" .format(country)
-        # get the first three language
-        language = "/" .join(movie_data['languageCategoryName'].split('/')[0:3])
-        print "language:{0}" .format(language)
         # get date, beginTime, endTime, week
         playTime = movie['playTime']
         showDate_list = movie['playTime'].split()[0].split('-')
@@ -132,9 +130,9 @@ def get_detailed_schedule_info(schedule_data):
         endTime = _to_dt(ts_endTime)
         week = get_week_day(playTime)
         #movie_info = "{0}\t{1}\t{2}-{3}\t{4}\t{5}\t{6}\t{7}\t{8}" .format(name,showDate,beginTime,endTime,cinema_name,director,shot_year,country,poster)
-        movie_info = "{0}\t{1}\t{2}-{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}\t{11}\t{12}\t{13}" \
+        movie_info = "{0}\t{1}\t{2}-{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}\t{11}\t{12}" \
                                                              .format(name,showDate,beginTime,endTime,
-                                                                     week,duration,cinema_name,movieHall,director,country,language,
+                                                                     week,duration,cinema_name,movieHall,director,country,
                                                                      movie_data['subtitle'],movie_data['projection_material'],
                                                                      movie_data['frameRatio'])
         movie_info_list.append(movie_info)
@@ -153,16 +151,16 @@ def judge_list_dup_element(list_name, n, v=0):
     return False
 
 
-def get_movie_detailed_info(start_day):
+def get_movie_detailed_info(start_day, lasting_days=31):
     ts_start_day = _to_timestamp(start_day)
-    ts_end_day = ts_start_day + 31*24*60*60
+    ts_end_day = ts_start_day + lasting_days*24*60*60
     cnt = 0
     schedule_list = []
     while ts_start_day <= ts_end_day:
         date = _to_day(ts_start_day)
         schedule_data = get_schedule_info(date)
         # stop once there are no shows for 3 consecutive days
-        if judge_list_dup_element(schedule_list, 5, 0):
+        if judge_list_dup_element(schedule_list, 7, 0):
             break
         if len(schedule_data) > 0:
             get_detailed_schedule_info(schedule_data)
@@ -172,7 +170,7 @@ def get_movie_detailed_info(start_day):
             # set element to 0 if there are no shows
             schedule_list.insert(cnt, 0)
         print (schedule_list)
-        time.sleep(0 + random.randint(1, 2))  
+        time.sleep(1 + random.randint(1, 3))  
         ts_start_day += 86400
         cnt += 1
     return movie_info_list
@@ -181,7 +179,7 @@ def get_movie_detailed_info(start_day):
 def get_schedule_list():
     # execute on the last 6 days of every month to get the movie schedule of next month
     ts_today = int(time.time())
-    for i in xrange(6, 0, -1):
+    for i in xrange(17, 0, -1):
         # timestamp of tomorrow
         ts = ts_today + i * 86400
         year = _to_day(ts).split('/')[0]
@@ -200,9 +198,9 @@ if __name__ == '__main__':
     # write to movie.csv
     BASEPATH = os.path.realpath(os.path.dirname(__file__))
     f_csv = BASEPATH + os.sep + 'movie.csv'
-    head_instruction = "film\tdate\ttime\tweek\tduration\ttheater\tmovieHall\tdirector\tcountry\tlanguage\tsubtitle\tprojection_material\tframeRatio"
-    #start_day = "2023-02-09 00:00:00"
-    #movie_info_list = get_movie_detailed_info(start_day)
+    head_instruction = "film\tdate\ttime\tweek\tduration\ttheater\tmovieHall\tdirector\tcountry\tsubtitle\tprojection_material\tframeRatio"
+    #start_day = "2023-08-01 00:00:00"
+    #movie_info_list = get_movie_detailed_info(start_day, 34) # lasting_days
     #write_to_csv(f_csv, head_instruction, *movie_info_list)
     #sys.exit(0)
     get_schedule_list()
