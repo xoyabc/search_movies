@@ -79,7 +79,7 @@ def get_schedule_info(date):
 #sys.exit(0)
 
 
-def get_movie_info(m_id):
+def get_movie_info(m_id, movieRewindingId):
     movie_info = {}
     #movie_url = 'https://yt.cfa.org.cn/api/movie/movieInfo/{0}?userId=' .format(m_id)  
     movie_url = 'https://yt5.cfa.org.cn/v5/api/movie/movieInfo/{0}?userId=' .format(m_id)  
@@ -90,24 +90,33 @@ def get_movie_info(m_id):
     movie_info['regionCategoryName'] = "/" .join([ x['categoryName'] for x in json_data['regionCategoryNameList'] ])
     # 字幕
     movie_info['subtitle'] = '未标注' if len(json_data['subtitle']) == 0 else json_data['subtitle'][0] 
-    # 版本 DCP
-    #movie_info['projection_material'] = 'N/A' if json_data['movieCinemaList'][0]['node'] == '' else json_data['movieCinemaList'][0]['node'].split('"')[1]
-    movie_info['projection_material'] = 'N/A' if json_data['movieCinemaList'][0]['nodeNameList'] == '' else json_data['movieCinemaList'][0]['nodeNameList'][-1]
     # 画面效果
     movie_info['framesCategoryName'] = 'N/A' if json_data['framesCategoryName']  == '' else json_data['framesCategoryName']
     # 画幅比
     movie_info['frameRatio'] = 'N/A' if json_data['frameRatioList'][0] == '' else json_data['frameRatioList'][0]
-    # 售卖情况
-    movie_info['seatTotal'] = 'N/A' if json_data['movieCinemaList'][0]['seatTotal'] == '' else json_data['movieCinemaList'][0]['seatTotal']
-    movie_info['seatSold'] = 'N/A' if json_data['movieCinemaList'][0]['seatTotal'] == '' else json_data['movieCinemaList'][0]['seatSold']
-    movie_info['saleStatus'] = 'N/A' if json_data['movieCinemaList'][0]['saleStatus'] == '' else json_data['movieCinemaList'][0]['saleStatus']
+    # get movieCinemaList data
+    movieCinemaList_data = json_data['movieCinemaList']
+    for cinema_info in movieCinemaList_data:
+        #print "cinema_info: {}" .format(cinema_info)
+        info_id = cinema_info['id']
+        if info_id == movieRewindingId:
+            print "info_id {0} {1}" .format(info_id, movieRewindingId)
+            print "seatTotal: {}" .format(cinema_info['seatTotal'])
+            # 售卖情况
+            movie_info['seatTotal'] = 'N/A' if cinema_info['seatTotal'] == '' else cinema_info['seatTotal']
+            movie_info['seatSold'] = 'N/A' if cinema_info['seatTotal'] == '' else cinema_info['seatSold']
+            movie_info['saleStatus'] = 'N/A' if cinema_info['saleStatus'] == '' else cinema_info['saleStatus']
+        else:
+            pass
     return movie_info
 
 
 def get_detailed_schedule_info(schedule_data):
     for movie in schedule_data:
         movie_id = movie['movieId']
+        movieRewindingId = movie['movieRewindingId']
         print "movie_id:{}" .format(movie_id)
+        print "movieRewindingId:{}" .format(movieRewindingId)
         name = movie['movieName']
         cinema_name = movie['cinemaName']
         movieHall = movie['movieHall']
@@ -120,15 +129,17 @@ def get_detailed_schedule_info(schedule_data):
                    if x['position'] == '导演'.decode('utf-8') ])
         # get the first three director
         director = "/" .join(director_all.split('/')[0:3])
-        movie_data = get_movie_info(movie_id)
+        movie_data = get_movie_info(movie_id, movieRewindingId)
         # get the first three country
         country = "/" .join(movie_data['regionCategoryName'].split('/')[0:3])
         print "country:{0}" .format(country)
         # get sale info
-        seatTotal = int(movie_data['seatTotal'])
-        seatSold = int(movie_data['seatSold'])
-        real_Sold = seatTotal - seatSold
-        sale_percent = '{:.0%}'.format(float(real_Sold) / float(seatTotal))
+        #seatTotal = int(movie_data['seatTotal'])
+        #seatSold = int(movie_data['seatSold'])
+        seatTotal = 'N/A' if movie_data['seatTotal'] == None else int(movie_data['seatTotal'])
+        seatSold = 'N/A' if movie_data['seatSold'] == None else int(movie_data['seatSold'])
+        real_Sold = 'N/A' if movie_data['seatTotal'] == None else seatTotal - seatSold
+        sale_percent = 'N/A' if movie_data['seatTotal'] == None else '{:.0%}'.format(float(real_Sold) / float(seatTotal))
         saleStatus = movie_data['saleStatus']
         # get date, beginTime, endTime, week
         playTime = movie['playTime']
@@ -179,7 +190,7 @@ def get_movie_detailed_info(start_day):
             # set element to 0 if there are no shows
             schedule_list.insert(cnt, 0)
         print (schedule_list)
-        time.sleep(1 + random.randint(1, 3))  
+        time.sleep(1 + random.randint(1, 2))  
         ts_start_day += 86400
         cnt += 1
     return movie_info_list
@@ -208,7 +219,7 @@ if __name__ == '__main__':
     BASEPATH = os.path.realpath(os.path.dirname(__file__))
     f_csv = BASEPATH + os.sep + 'movie.csv'
     head_instruction = "film\tdate\ttime\tweek\ttheater\tmovieHall\tdirector\tseatSold\tseatTotal\tsale_percent"
-    start_day = "2023-07-09 00:00:00"
+    start_day = "2023-09-20 00:00:00"
     movie_info_list = get_movie_detailed_info(start_day)
     write_to_csv(f_csv, head_instruction, *movie_info_list)
     sys.exit(0)
