@@ -106,8 +106,6 @@ def get_movie_info(m_id, movieRewindingId):
             movie_info['seatTotal'] = 'N/A' if cinema_info['seatTotal'] == '' else cinema_info['seatTotal']
             movie_info['seatSold'] = 'N/A' if cinema_info['seatTotal'] == '' else cinema_info['seatSold']
             movie_info['saleStatus'] = 'N/A' if cinema_info['saleStatus'] == '' else cinema_info['saleStatus']
-        else:
-            pass
     return movie_info
 
 
