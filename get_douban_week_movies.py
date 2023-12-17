@@ -25,9 +25,7 @@ sys.setdefaultencoding("utf-8")
 https://movie.douban.com/subject/4436880/
 '''
 
-#url = "http://ys.louxiaohui.com/index.php"
-#base_url = "https://ys.louxiaohui.com"
-url = "http://vowys.xyz/index.php"
+url = "https://vowys.xyz/index.php"
 base_url = "https://vowys.xyz"
 BASEPATH = os.path.realpath(os.path.dirname(__file__))
 douban_weekly_movies = BASEPATH + os.sep + 'douban_weekly_movies.list'
@@ -160,7 +158,7 @@ def search_maccms(name, year = None):
     #payload = "wd=%E7%96%BE%E9%80%9F%E5%A4%87%E6%88%98"
     payload = "wd={}".format(keyword)
     #print payload, querystring
-    response = requests.request("POST", url, data=payload, headers=headers, params=querystring)
+    response = requests.request("POST", url, data=payload, headers=headers, params=querystring, verify=False)
     html = response.text
     soup = BeautifulSoup(html.encode('utf-8'), "html.parser")
     all_result = soup.select('div[class="channel b"] > ul > li')[0:10]

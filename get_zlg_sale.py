@@ -171,7 +171,11 @@ def judge_list_dup_element(list_name, n, v=0):
 
 def get_movie_detailed_info(start_day):
     ts_start_day = _to_timestamp(start_day)
+<<<<<<< HEAD
     ts_end_day = ts_start_day + 36*24*60*60
+=======
+    ts_end_day = ts_start_day + 31*24*60*60
+>>>>>>> 5b8c6037e855c2ca623fc0ffabc2f53be7d242d7
     cnt = 0
     schedule_list = []
     while ts_start_day <= ts_end_day:
@@ -217,7 +221,11 @@ if __name__ == '__main__':
     BASEPATH = os.path.realpath(os.path.dirname(__file__))
     f_csv = BASEPATH + os.sep + 'movie.csv'
     head_instruction = "film\tdate\ttime\tweek\ttheater\tmovieHall\tdirector\tseatSold\tseatTotal\tsale_percent"
+<<<<<<< HEAD
     start_day = "2023-10-07 00:00:00"
+=======
+    start_day = "2023-09-20 00:00:00"
+>>>>>>> 5b8c6037e855c2ca623fc0ffabc2f53be7d242d7
     movie_info_list = get_movie_detailed_info(start_day)
     write_to_csv(f_csv, head_instruction, *movie_info_list)
     sys.exit(0)

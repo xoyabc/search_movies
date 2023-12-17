@@ -205,8 +205,15 @@ if __name__ == '__main__':
     BASEPATH = os.path.realpath(os.path.dirname(__file__))
     f_csv = BASEPATH + os.sep + 'movie.csv'
     head_instruction = "film\tdate\ttime\tweek\tduration\ttheater\tmovieHall\tdirector\tcountry\tlanguage\tsubtitle\tprojection_material\tframeRatio"
+<<<<<<< HEAD
     start_day = "2023-12-18 00:00:00"
     movie_info_list = get_movie_detailed_info(start_day, 1) # lasting_days
     write_to_csv(f_csv, head_instruction, *movie_info_list)
     sys.exit(0)
+=======
+    #start_day = "2023-08-01 00:00:00"
+    #movie_info_list = get_movie_detailed_info(start_day, 34) # lasting_days
+    #write_to_csv(f_csv, head_instruction, *movie_info_list)
+    #sys.exit(0)
+>>>>>>> 5b8c6037e855c2ca623fc0ffabc2f53be7d242d7
     get_schedule_list()

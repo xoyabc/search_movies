@@ -39,8 +39,12 @@ urllib3.disable_warnings()
 '''
 
 cinemas_url = [
+<<<<<<< HEAD
 'https://group.leying.com/cinema/play-info?cinema_id=13&city_id=499&client_id=&group=10000&pver=7.0&session_id=&source=4&ver=6.5.0&width=500&.sig=10100db52e33ef503e4c5aa9f0a50a7e',
 'https://group.leying.com/cinema/play-info?cinema_id=15&city_id=499&client_id=&group=10000&pver=7.0&session_id=&source=4&ver=6.5.0&width=500&.sig=5256150418fcf0d30b8b639e538700db'
+=======
+'https://group.leying.com/cinema/play-info?cinema_id=13&city_id=499&client_id=&group=10000&pver=7.0&session_id=&source=4&ver=6.5.0&width=500&.sig=10100db52e33ef503e4c5aa9f0a50a7e'
+>>>>>>> 5b8c6037e855c2ca623fc0ffabc2f53be7d242d7
 ]
 
 ticket_headers = {

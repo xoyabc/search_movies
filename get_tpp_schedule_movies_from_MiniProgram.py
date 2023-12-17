@@ -31,7 +31,7 @@ def write_to_csv(filename, head_line, *info_list):
 # convert to json format
 def json_load_from_file(filename):
     with open(filename, 'rU') as f:
-        dataStr = f.read().replace('mtopjsonp2(', '').replace('mtopjsonp3(', '')
+        dataStr = f.read().replace('mtopjsonp1(', '').replace('mtopjsonp2(', '').replace('mtopjsonp3(', '')
         # remove last ")"
         dataStr_new = re.sub(r'\)$', r'', dataStr)
         data = json.loads(dataStr_new)
@@ -64,7 +64,10 @@ def get_movie_info(schedule_data,cinema_name):
             name = re.sub(r'(\s+[^ ]*\s*2D|\)|\s+)', '', show['showVersion']) if re.search(pattern, movie_name) else movie_name
             beginTime = show['openTime']
             endTime = show['closeTime']
-            movie_info = "{0}\t{1}\t{2}-{3}\t{4}" .format(name,showDate,beginTime,endTime,cinema_name)
+            hallName = show['hallName']
+            oriPrice = show['oriPrice']
+            Price = int(oriPrice)/100
+            movie_info = "{0}\t{1}\t{2}-{3}\t{4}\t{5}\t{6}" .format(name,showDate,beginTime,endTime,cinema_name,hallName,Price)
             movie_info_list.append(movie_info)
             print movie_info
     
@@ -76,7 +79,10 @@ def get_movie_detailed_info(All=False):
     cinema_name = data['cinemaVo']['cinemaName']
     for k, v in showScheduleMap.iteritems():
         movie_id = k
-        movie_name = shows_data[movie_id]['showName']
+        try:
+            movie_name = shows_data[movie_id]['showName']
+        except Exception as e:
+            pass
         if All:
             get_movie_info(v, cinema_name)
         else:
@@ -100,7 +106,7 @@ if __name__ == '__main__':
     pattern=re.compile(ur'([\u5f71\u7247\u5e08\u7279\u9898\u5c55]|\u4f5c\u54c1|\u7eaa\u5ff5|\u56de\u987e|\u4fee\u590d){1,}.*?([\u5c55\u5468\u5b63\u8282\u6620]|\u4e13\u573a|\u653e\u6620){1,}')
     # write to movie.csv
     f_csv = 'movie.csv'
-    head_instruction = "film\tdate\ttime\ttheater"
+    head_instruction = "film\tdate\ttime\ttheater\thallName\tPrice"
     if len(sys.argv) > 1:
         if sys.argv[1] == 'all':
             movie_info_list = get_movie_detailed_info(All=True)
