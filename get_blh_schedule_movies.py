@@ -17,9 +17,30 @@ sys.setdefaultencoding("utf-8")
 import urllib3
 urllib3.disable_warnings()
 
+# 12 北京百老汇影城（东方新天地店）
+'''
+'https://group.leying.com/cinema/play-info?cinema_id=12&city_id=499&client_id=&group=10000&pver=7.0&session_id=&source=4&ver=6.5.0&width=500&.sig=4a9dd5d5daf96e24070e56871e52cbe6',
+'''
+# 13 北京百老汇电影中心（万国城店）
+'''
+'https://group.leying.com/cinema/play-info?cinema_id=13&city_id=499&client_id=&group=10000&pver=7.0&session_id=&source=4&ver=6.5.0&width=500&.sig=10100db52e33ef503e4c5aa9f0a50a7e',
+'''
+# 14 北京百老汇影城（LUXE全景声国瑞购物中心店）
+'''
+'https://group.leying.com/cinema/play-info?cinema_id=14&city_id=499&client_id=&group=10000&pver=7.0&session_id=&source=4&ver=6.5.0&width=500&.sig=50d588125eb7e33b9e472e17305a92a4',
+'''
+# 15 北京百老汇影城（apm店）
+'''
+'https://group.leying.com/cinema/play-info?cinema_id=15&city_id=499&client_id=&group=10000&pver=7.0&session_id=&source=4&ver=6.5.0&width=500&.sig=5256150418fcf0d30b8b639e538700db',
+'''
+# 25 北京百丽宫影城（国贸店）
+'''
+'https://group.leying.com/cinema/play-info?cinema_id=25&city_id=499&client_id=&group=10000&pver=7.0&session_id=&source=4&ver=6.5.0&width=500&.sig=9cd3e57db9058a659936c6d3abbc6fc1',
+'''
+
 cinemas_url = [
-'http://group.leying.com/cinema/play-info?.sig=f481dd04ced792236d7cfd6d3788a683&cinema_id=12&city_id=499&client_id=00e02cf9a0191&group=10000&pver=7.0&session_id=5fcdc6b368629ebe73094539eaf19bb56675b8f6d0a5a&source=105001&ver=5.9.9&width=270',
-'http://group.leying.com/cinema/play-info?.sig=45af657165af48c082f067e021cd868d&cinema_id=13&city_id=499&client_id=00e02cf9a0191&group=10000&pver=7.0&session_id=5fcdc6b368629ebe73094539eaf19bb56675b8f6d0a5a&source=105001&ver=5.9.9&width=270'
+'https://group.leying.com/cinema/play-info?cinema_id=13&city_id=499&client_id=&group=10000&pver=7.0&session_id=&source=4&ver=6.5.0&width=500&.sig=10100db52e33ef503e4c5aa9f0a50a7e',
+'https://group.leying.com/cinema/play-info?cinema_id=15&city_id=499&client_id=&group=10000&pver=7.0&session_id=&source=4&ver=6.5.0&width=500&.sig=5256150418fcf0d30b8b639e538700db'
 ]
 
 ticket_headers = {
