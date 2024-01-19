@@ -187,12 +187,11 @@ def get_detailed_schedule_info(schedule_data):
         endTime = _to_dt(ts_endTime)
         week = get_week_day(playTime)
         #movie_info = "{0}\t{1}\t{2}-{3}\t{4}\t{5}\t{6}\t{7}\t{8}" .format(name,showDate,beginTime,endTime,cinema_name,director,shot_year,country,poster)
-        movie_info = "{0}\t{1}\t{2}-{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10} \
-                      \t{11}\t{12}\t{13}\t{14}\t{15}\t{16}" \
-                                                             .format(name,showDate,beginTime,endTime,
-                                                                     week,duration,cinema_name,movieHall,director,country,language,
-                                                                     movie_data['subtitle'],movie_data['projection_material'],
-                                                                     movie_data['frameRatio'],beginTime,fare,year)
+        movie_info = "{0}\t{1}\t{2}-{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}\t{11}\t{12}\t{13}\t{14}\t{15}\t{16}" \
+                     .format(name,showDate,beginTime,endTime,week,duration,
+                             cinema_name,movieHall,director,country,language,
+                             movie_data['subtitle'],movie_data['projection_material'],
+                             movie_data['frameRatio'],beginTime,fare,year)
         movie_info_list.append(movie_info)
         print cinema_name,duration,name,movieHall,poster,director
         print movie_info
@@ -258,7 +257,7 @@ if __name__ == '__main__':
     f_csv = BASEPATH + os.sep + 'movie.csv'
     head_instruction = "film\tdate\ttime\tweek\tduration\ttheater\tmovieHall\tdirector\tcountry\tlanguage\tsubtitle\tprojection_material\tframeRatio\tplayTime\tfare\tyear"
     start_day = "2024-01-20 00:00:00"
-    movie_info_list = get_movie_detailed_info(start_day, 2) # lasting_days
+    movie_info_list = get_movie_detailed_info(start_day, 0) # lasting_days
     write_to_csv(f_csv, head_instruction, *movie_info_list)
     write_to_excel(*movie_info_list)
     sys.exit(0)
