@@ -16,6 +16,7 @@ import time
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
+from openpyxl import Workbook
 import urllib3
 urllib3.disable_warnings()
 
@@ -23,6 +24,18 @@ ticket_headers = {
     'user-agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36",
     }
 
+# force the number in list to int or float
+def convert_list_format(info_list):
+    info_new = []
+    for x in info_list:
+        if re.search(r'(^[0-9]{1,5}(\.0)?$)', x):
+            x = int(float(x))
+        elif re.search(r'(^[0-9]{1,2}\.[0-9]{2}$)', x):
+            x = float(x)
+        else:
+            x = x
+        info_new.append(x)
+    return info_new
 
 # write to csv file
 def write_to_csv(filename, head_line, *info_list):
@@ -33,6 +46,41 @@ def write_to_csv(filename, head_line, *info_list):
         for row in info_list:
             row_list = row.split('\t')
             writer.writerow(row_list)
+
+# write to excel file
+#def write_to_excel(filename, *info_list):
+def write_to_excel(*info_list):
+    wb = Workbook(write_only=True)
+    ws = []
+    host_tag_lists = [u'排片表', u'排片表-旧']
+    row_list_old = []
+    # create sheet
+    for i in range(len(host_tag_lists)):
+        ws.append(wb.create_sheet(title=host_tag_lists[i]))  # utf8->unicode
+    # insert sheet header
+    ws[0].append(['film', 'date', 'time', 'week', 'duration', 'year', 'fare', 'theater', 'movieHall', 'country', 'director', 'language', 'subtitle', 'projection_material', 'frameRatio'])
+    #ws[1].append(['日期', '星期', '放映时间', '片名', '国家', '导演', '时长', '影院', '影厅', '票价'])
+    ws[1].append(['日期', '星期', '放映时间', '影片信息', '时长', '影院', '影厅', '票价'])
+    for row in info_list:
+        row_info = row.split('\t')
+        row_list = convert_list_format(row_info[0:5] \
+                                      + row_info[15:13:-1] + row_info[5:7] \
+                                      + row_info[8:6:-1] + row_info[9:13])
+        theater = row_info[5].replace('艺术影院', '')
+        movie_info = row_info[0] + '\n' + row_info[15] + '\n' \
+                     + row_info[8] + ' | ' + row_info[7]
+        #row_list_old.append([row_info[1], row_info[3], row_info[13], row_info[0], row_info[8], row_info[7], row_info[4], theater, row_info[6], row_info[14]])
+        row_list_old.append([row_info[1], row_info[3], row_info[13], movie_info, row_info[4], theater, row_info[6], row_info[14]])
+        ws[0].append(row_list)
+    #for row in sorted(row_list_old, key=lambda x:(x[7], x[0], x[2]), reverse=False):
+    for row in sorted(row_list_old, key=lambda x:(x[5], x[0], x[2]), reverse=False):
+        row_list = convert_list_format(row)
+        ws[1].append(row_list)
+    # define the filename and save it to local disk
+    save_path = 'zlg_schedule'
+    save_path += '.xlsx'
+    wb.save(save_path)
+
 
 def _to_timestamp(dt):
     timeArray = time.strptime(dt, "%Y-%m-%d %H:%M:%S")
@@ -98,6 +146,7 @@ def get_movie_info(m_id):
     movie_info['projection_material'] = 'N/A' if json_data['movieCinemaList'][0]['nodeNameList'] == '' else json_data['movieCinemaList'][0]['nodeNameList'][-1]
     # 画面效果
     movie_info['framesCategoryName'] = 'N/A' if json_data['framesCategoryName']  == '' else json_data['framesCategoryName']
+    print (json_data['framesCategoryName'])
     # 画幅比
     movie_info['frameRatio'] = 'N/A' if json_data['frameRatioList'][0] == '' else json_data['frameRatioList'][0]
     return movie_info
@@ -111,6 +160,8 @@ def get_detailed_schedule_info(schedule_data):
         cinema_name = movie['cinemaName']
         movieHall = movie['movieHall']
         duration = movie['movieMinute']
+        fare = movie['fares']
+        year = movie['movieTime'].split()[0].split('-')[0]
         poster = movie['pictureLittle']
         movieActorList = movie['movieActorList']
         print "movieActorList:{0}" .format(movieActorList)
@@ -136,11 +187,12 @@ def get_detailed_schedule_info(schedule_data):
         endTime = _to_dt(ts_endTime)
         week = get_week_day(playTime)
         #movie_info = "{0}\t{1}\t{2}-{3}\t{4}\t{5}\t{6}\t{7}\t{8}" .format(name,showDate,beginTime,endTime,cinema_name,director,shot_year,country,poster)
-        movie_info = "{0}\t{1}\t{2}-{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}\t{11}\t{12}\t{13}" \
+        movie_info = "{0}\t{1}\t{2}-{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10} \
+                      \t{11}\t{12}\t{13}\t{14}\t{15}\t{16}" \
                                                              .format(name,showDate,beginTime,endTime,
                                                                      week,duration,cinema_name,movieHall,director,country,language,
                                                                      movie_data['subtitle'],movie_data['projection_material'],
-                                                                     movie_data['frameRatio'])
+                                                                     movie_data['frameRatio'],beginTime,fare,year)
         movie_info_list.append(movie_info)
         print cinema_name,duration,name,movieHall,poster,director
         print movie_info
@@ -204,9 +256,10 @@ if __name__ == '__main__':
     # write to movie.csv
     BASEPATH = os.path.realpath(os.path.dirname(__file__))
     f_csv = BASEPATH + os.sep + 'movie.csv'
-    head_instruction = "film\tdate\ttime\tweek\tduration\ttheater\tmovieHall\tdirector\tcountry\tlanguage\tsubtitle\tprojection_material\tframeRatio"
-    start_day = "2023-12-18 00:00:00"
-    movie_info_list = get_movie_detailed_info(start_day, 1) # lasting_days
+    head_instruction = "film\tdate\ttime\tweek\tduration\ttheater\tmovieHall\tdirector\tcountry\tlanguage\tsubtitle\tprojection_material\tframeRatio\tplayTime\tfare\tyear"
+    start_day = "2024-01-20 00:00:00"
+    movie_info_list = get_movie_detailed_info(start_day, 2) # lasting_days
     write_to_csv(f_csv, head_instruction, *movie_info_list)
+    write_to_excel(*movie_info_list)
     sys.exit(0)
     get_schedule_list()
