@@ -148,7 +148,10 @@ def get_movie_info(m_id):
     movie_info['framesCategoryName'] = 'N/A' if json_data['framesCategoryName']  == '' else json_data['framesCategoryName']
     print (json_data['framesCategoryName'])
     # 画幅比
-    movie_info['frameRatio'] = 'N/A' if json_data['frameRatioList'][0] == '' else json_data['frameRatioList'][0]
+    try:
+        movie_info['frameRatio'] = 'N/A' if json_data['frameRatioList'][0] == '' else json_data['frameRatioList'][0]
+    except Exception:
+        movie_info['frameRatio'] = 'N/A'
     return movie_info
 
 
@@ -256,8 +259,8 @@ if __name__ == '__main__':
     BASEPATH = os.path.realpath(os.path.dirname(__file__))
     f_csv = BASEPATH + os.sep + 'movie.csv'
     head_instruction = "film\tdate\ttime\tweek\tduration\ttheater\tmovieHall\tdirector\tcountry\tlanguage\tsubtitle\tprojection_material\tframeRatio\tplayTime\tfare\tyear"
-    start_day = "2024-01-20 00:00:00"
-    movie_info_list = get_movie_detailed_info(start_day, 0) # lasting_days
+    start_day = "2024-03-01 00:00:00"
+    movie_info_list = get_movie_detailed_info(start_day, 31) # lasting_days
     write_to_csv(f_csv, head_instruction, *movie_info_list)
     write_to_excel(*movie_info_list)
     sys.exit(0)
