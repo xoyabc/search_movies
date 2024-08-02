@@ -37,14 +37,13 @@ urllib3.disable_warnings()
 '''
 'https://group.leying.com/cinema/play-info?cinema_id=25&city_id=499&client_id=&group=10000&pver=7.0&session_id=&source=4&ver=6.5.0&width=500&.sig=9cd3e57db9058a659936c6d3abbc6fc1',
 '''
+# 24 济南百丽宫影城（恒隆广场店）
+'''
+'https://group.leying.com/cinema/play-info?cinema_id=24&city_id=357&client_id=&group=10000&pver=7.0&session_id=&source=4&ver=7.8.8&.sig=04a7d8a354e6e48d5ed9c903a8187e00',
+'''
 
 cinemas_url = [
-<<<<<<< HEAD
-'https://group.leying.com/cinema/play-info?cinema_id=13&city_id=499&client_id=&group=10000&pver=7.0&session_id=&source=4&ver=6.5.0&width=500&.sig=10100db52e33ef503e4c5aa9f0a50a7e',
-'https://group.leying.com/cinema/play-info?cinema_id=15&city_id=499&client_id=&group=10000&pver=7.0&session_id=&source=4&ver=6.5.0&width=500&.sig=5256150418fcf0d30b8b639e538700db'
-=======
-'https://group.leying.com/cinema/play-info?cinema_id=13&city_id=499&client_id=&group=10000&pver=7.0&session_id=&source=4&ver=6.5.0&width=500&.sig=10100db52e33ef503e4c5aa9f0a50a7e'
->>>>>>> 5b8c6037e855c2ca623fc0ffabc2f53be7d242d7
+'https://group.leying.com/cinema/play-info?cinema_id=24&city_id=357&client_id=&group=10000&pver=7.0&session_id=&source=4&ver=7.8.8&.sig=04a7d8a354e6e48d5ed9c903a8187e00'
 ]
 
 ticket_headers = {
