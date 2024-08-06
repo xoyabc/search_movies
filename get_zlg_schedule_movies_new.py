@@ -182,7 +182,6 @@ def get_detailed_schedule_info(schedule_data, cinema_list):
             director_all = movie_data['director_all']
             director = 'N/A' if director_all == 'N/A' or director_all == '' \
                        else "/" .join(director_all.split('/')[0:3])
-            #director = "/" .join(movie_data['director_all'].split('/')[0:3])
             # get the first three country
             country = "/" .join(movie_data['regionCategoryName'].split('/')[0:3])
             print "country:{0}" .format(country)
@@ -234,7 +233,7 @@ def get_movie_detailed_info(start_day, cinema='北京总馆', lasting_days=31):
     while ts_start_day <= ts_end_day:
         month  =  "/" .join(_to_day(ts_start_day).split('/')[0:2])
         if month not in month_list:
-            schedule_data = get_schedule_info(month)[0:2]
+            schedule_data = get_schedule_info(month)
             if len(schedule_data) > 0:
                 get_detailed_schedule_info(schedule_data, cinema_list)
         month_list.insert(0, month)
