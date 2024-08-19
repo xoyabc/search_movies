@@ -26,7 +26,7 @@ urllib3.disable_warnings()
 
 ticket_headers = {
     'user-agent': "Mozilla/5.0  AppleWebKit/537.36 Version/4.0 Mobile Safari/537.36 uni-app Html5Plus/1.0 (Immersed/33.893127)",
-    'Authori-zation': "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwd2QiOiJkNDFkOGNkOThmMDBiMjA0ZTk4MDA5OThlY2Y4NDI3ZSIsImlzcyI6ImFwaS5ndW95aW5namlheWluZy5jbiIsImF1ZCI6ImFwaS5ndW95aW5namlheWluZy5jbiIsImlhdCI6MTcyMTYyNDkwNywibmJmIjoxNzIxNjI0OTA3LCJleHAiOjE3NTMxNjA5MDcsImp0aSI6eyJpZCI6MTQ1NiwidHlwZSI6ImFwaSJ9fQ.sesor14ewLKctSrqFyV1MqLACVAgiVaZ8Y66J50LliA",
+    'Authori-zation': "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwd2QiOiJkNDFkOGNkOThmMDBiMjA0ZTk4MDA5OThlY2Y4NDI3ZSIsImlzcyI6ImFwaS5ndW95aW5namlheWluZy5jbiIsImF1ZCI6ImFwaS5ndW95aW5namlheWluZy5jbiIsImlhdCI6MTcyMzgzNDE5NiwibmJmIjoxNzIzODM0MTk2LCJleHAiOjE3NTUzNzAxOTYsImp0aSI6eyJpZCI6MTQ1NiwidHlwZSI6ImFwaSJ9fQ.UcrzPEQitSKWSPbr5QxMneYp-3rn2mJNLJvmxsPK1nA",
     'Cookie': "cb_lang=zh-cn; PHPSESSID=ee68cbd9f743de78220e39adb8eb45da"
     }
 
@@ -158,12 +158,12 @@ def get_movie_info(m_id):
     # 版本 DCP
     #movie_info['projection_material'] = 'N/A' if len(json_data['film_pformat_code']) == 0 else json_data['film_pformat_code']
     try:
-        movie_info['projection_material'] = 'N/A' if json_data['screens'][0]['screen_format'] == '' else json_data['screens'][0]['screen_format']
+        movie_info['projection_material'] = 'N/A' if json_data['screens'][0]['screen_format'] == '' else json_data['screens'][0]['screen_format'].strip()
     except Exception:
         movie_info['projection_material'] = 'N/A'
     # 画幅比
     try:
-        movie_info['frameRatio'] = 'N/A' if json_data['film_frameratio_code'] == '' else json_data['film_frameratio_code']
+        movie_info['frameRatio'] = 'N/A' if json_data['film_frameratio_code'] == '' else json_data['film_frameratio_code'].strip()
     except Exception:
         movie_info['frameRatio'] = 'N/A'
     return movie_info

@@ -25,7 +25,7 @@ urllib3.disable_warnings()
 
 ticket_headers = {
     'user-agent': "Mozilla/5.0  AppleWebKit/537.36 Version/4.0 Mobile Safari/537.36 uni-app Html5Plus/1.0 (Immersed/33.893127)",
-    'Authori-zation': "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwd2QiOiJkNDFkOGNkOThmMDBiMjA0ZTk4MDA5OThlY2Y4NDI3ZSIsImlzcyI6ImFwaS5ndW95aW5namlheWluZy5jbiIsImF1ZCI6ImFwaS5ndW95aW5namlheWluZy5jbiIsImlhdCI6MTcyMTYyNDkwNywibmJmIjoxNzIxNjI0OTA3LCJleHAiOjE3NTMxNjA5MDcsImp0aSI6eyJpZCI6MTQ1NiwidHlwZSI6ImFwaSJ9fQ.sesor14ewLKctSrqFyV1MqLACVAgiVaZ8Y66J50LliA",
+    'Authori-zation': "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwd2QiOiJkNDFkOGNkOThmMDBiMjA0ZTk4MDA5OThlY2Y4NDI3ZSIsImlzcyI6ImFwaS5ndW95aW5namlheWluZy5jbiIsImF1ZCI6ImFwaS5ndW95aW5namlheWluZy5jbiIsImlhdCI6MTcyMzgzNDE5NiwibmJmIjoxNzIzODM0MTk2LCJleHAiOjE3NTUzNzAxOTYsImp0aSI6eyJpZCI6MTQ1NiwidHlwZSI6ImFwaSJ9fQ.UcrzPEQitSKWSPbr5QxMneYp-3rn2mJNLJvmxsPK1nA",
     'Cookie': "cb_lang=zh-cn; PHPSESSID=ee68cbd9f743de78220e39adb8eb45da"
     }
 
@@ -79,16 +79,16 @@ def get_movie_info(m_id):
     movie_info['subtitle'] = '未标注' if len(json_data['film_caption_code']) == 0 else "/" .join([ x for x in json_data['film_caption_code'].split() ])
     # 画幅比
     try:
-        movie_info['frameRatio'] = 'N/A' if json_data['film_frameratio_code'] == '' else json_data['film_frameratio_code']
+        movie_info['frameRatio'] = 'N/A' if json_data['film_frameratio_code'] == '' else json_data['film_frameratio_code'].strip()
     except Exception:
         movie_info['frameRatio'] = 'N/A'
     # 版本 DCP
     try:
-        movie_info['projection_material'] = 'N/A' if json_data['screens'][0]['screen_format'] == '' else json_data['screens'][0]['screen_format']
+        movie_info['projection_material'] = 'N/A' if json_data['screens'][0]['screen_format'] == '' else json_data['screens'][0]['screen_format'].strip()
     except Exception:
         movie_info['projection_material'] = 'N/A'
     # 色彩
-    movie_info['color'] = 'N/A' if json_data['film_color_code'] == '' else json_data['film_color_code']
+    movie_info['color'] = 'N/A' if json_data['film_color_code'] == '' else json_data['film_color_code'].strip()
     # duration
     movie_info['duration'] = 'N/A' if json_data['film_duration'] == '' else json_data['film_duration']
     # get all director
@@ -137,5 +137,6 @@ if __name__ == '__main__':
     BASEPATH = os.path.realpath(os.path.dirname(__file__))
     f_csv = BASEPATH + os.sep + 'movie.csv'
     head_instruction = "movie_id\tfilm\tcountry\tyear\tdirector\tduration\tcolor\tlanguage\tsubtitle\tframeRatio"
-    movie_info_list = get_movie_detailed_info(2409, 2450)
+    #movie_info_list = get_movie_detailed_info(2409, 2450)
+    movie_info_list = get_movie_detailed_info(814, 814)
     write_to_csv(f_csv, head_instruction, *movie_info_list)
