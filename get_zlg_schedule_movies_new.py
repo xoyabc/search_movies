@@ -13,6 +13,7 @@ import csv
 import codecs
 from urllib import unquote
 import time
+from headers_config import HEADER_CONFIG
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
@@ -28,6 +29,14 @@ ticket_headers = {
     'user-agent': "Mozilla/5.0  AppleWebKit/537.36 Version/4.0 Mobile Safari/537.36 uni-app Html5Plus/1.0 (Immersed/33.893127)",
     'Authori-zation': "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwd2QiOiJkNDFkOGNkOThmMDBiMjA0ZTk4MDA5OThlY2Y4NDI3ZSIsImlzcyI6ImFwaS5ndW95aW5namlheWluZy5jbiIsImF1ZCI6ImFwaS5ndW95aW5namlheWluZy5jbiIsImlhdCI6MTcyNjI3NDcyMiwibmJmIjoxNzI2Mjc0NzIyLCJleHAiOjE3NTc4MTA3MjIsImp0aSI6eyJpZCI6ODE2MzIsInR5cGUiOiJhcGkifX0.BSkVFG_TjxY2649C0YVnw-eM2soaQvH6b0VpQ-_zkc8",
     'Cookie': "cb_lang=zh-cn; PHPSESSID=ee68cbd9f743de78220e39adb8eb45da"
+    }
+ticket_headers['Authori-zation'] = HEADER_CONFIG['Authori-zation']
+ticket_headers['Cookie'] = HEADER_CONFIG['Cookie']
+
+# 请求参数
+payload = {
+    'program_id': '1003',
+    'uid': 86265
     }
 
 # force the number in list to int or float
@@ -141,8 +150,11 @@ def get_schedule_info(date):
 
 def get_movie_info(m_id):
     movie_info = {}
-    movie_url = 'http://api.guoyingjiaying.cn/filmcinema/getprogram_details_app?prorgam_id={0}&uid=81632' .format(m_id)  
-    res = requests.get(movie_url, headers=ticket_headers, verify=False)
+    payload['program_id'] = m_id
+    #movie_url = 'http://api.guoyingjiaying.cn/filmcinema/getprogram_details_app?prorgam_id={0}&uid=81632' .format(m_id)  
+    #res = requests.get(movie_url, headers=ticket_headers, verify=False)
+    movie_url = 'http://api.guoyingjiaying.cn/api/v3/movie/getProgramDetailsApp'
+    res = requests.request("POST", movie_url, data=payload, headers=ticket_headers)
     json_data=res.json()['data']
     try:
         movieActorList = json_data['performer']

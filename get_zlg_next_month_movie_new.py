@@ -13,6 +13,7 @@ import csv
 import codecs
 from urllib import unquote
 import time
+from headers_config import HEADER_CONFIG
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
@@ -25,8 +26,16 @@ urllib3.disable_warnings()
 
 ticket_headers = {
     'user-agent': "Mozilla/5.0  AppleWebKit/537.36 Version/4.0 Mobile Safari/537.36 uni-app Html5Plus/1.0 (Immersed/33.893127)",
-    'Authori-zation': "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwd2QiOiJkNDFkOGNkOThmMDBiMjA0ZTk4MDA5OThlY2Y4NDI3ZSIsImlzcyI6ImFwaS5ndW95aW5namlheWluZy5jbiIsImF1ZCI6ImFwaS5ndW95aW5namlheWluZy5jbiIsImlhdCI6MTcyMzgzNDE5NiwibmJmIjoxNzIzODM0MTk2LCJleHAiOjE3NTUzNzAxOTYsImp0aSI6eyJpZCI6MTQ1NiwidHlwZSI6ImFwaSJ9fQ.UcrzPEQitSKWSPbr5QxMneYp-3rn2mJNLJvmxsPK1nA",
+    'Authori-zation': "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwd2QiOiJkNDFkOGNkOThmMDBiMjA0ZTk4MDA5OThlY2Y4NDI3ZSIsImlzcyI6ImFwaS5ndW95aW5namlheWluZy5jbiIsImF1ZCI6ImFwaS5ndW95aW5namlheWluZy5jbiIsImlhdCI6MTcyNjI3NDcyMiwibmJmIjoxNzI2Mjc0NzIyLCJleHAiOjE3NTc4MTA3MjIsImp0aSI6eyJpZCI6ODE2MzIsInR5cGUiOiJhcGkifX0.BSkVFG_TjxY2649C0YVnw-eM2soaQvH6b0VpQ-_zkc8",
     'Cookie': "cb_lang=zh-cn; PHPSESSID=ee68cbd9f743de78220e39adb8eb45da"
+    }
+ticket_headers['Authori-zation'] = HEADER_CONFIG['Authori-zation']
+ticket_headers['Cookie'] = HEADER_CONFIG['Cookie']
+
+# 请求参数
+payload = {
+    'program_id': '1003',
+    'uid': 86265
     }
 
 # write to csv file
@@ -59,10 +68,13 @@ def _to_day(ts):
 
 def get_movie_info(m_id):
     movie_info = {}
-    movie_url = 'http://api.guoyingjiaying.cn/filmcinema/getprogram_details_app?prorgam_id={0}&uid=1456' .format(m_id)  
+    payload['program_id'] = m_id
+    movie_url = 'http://api.guoyingjiaying.cn/api/v3/movie/getProgramDetailsApp'
+    #movie_url = 'http://api.guoyingjiaying.cn/filmcinema/getprogram_details_app?prorgam_id={0}&uid=81632' .format(m_id)  
     #movie_LibrryInfo_url = 'https://yt5.cfa.org.cn/v5/api/movie/movieLibrryInfo/{0}' .format(m_id)
     #movieActorList_url = 'https://yt5.cfa.org.cn/v5/api/movie/movieActorList/{0}' .format(m_id)
-    res = requests.get(movie_url, headers=ticket_headers, verify=False)
+    #res = requests.get(movie_url, headers=ticket_headers, verify=False)
+    res = requests.request("POST", movie_url, data=payload, headers=ticket_headers)
     json_data=res.json()['data']
     #LibrryInfo_data = requests.get(movie_LibrryInfo_url, headers=ticket_headers, verify=False).json()['data']
     #movieActorList = requests.get(movieActorList_url, headers=ticket_headers, verify=False).json()['data']
@@ -126,7 +138,7 @@ def get_detailed_schedule_info(movie_id):
 def get_movie_detailed_info(start_id, end_id):
     while start_id <= end_id:
         get_detailed_schedule_info(start_id)
-        time.sleep(0 + random.randint(1, 2))  
+        time.sleep(3 + random.randint(0, 3))  
         start_id += 1
     return movie_info_list
 
@@ -138,5 +150,5 @@ if __name__ == '__main__':
     f_csv = BASEPATH + os.sep + 'movie.csv'
     head_instruction = "movie_id\tfilm\tcountry\tyear\tdirector\tduration\tcolor\tlanguage\tsubtitle\tframeRatio"
     #movie_info_list = get_movie_detailed_info(2409, 2450)
-    movie_info_list = get_movie_detailed_info(814, 814)
+    movie_info_list = get_movie_detailed_info(2530, 2550)
     write_to_csv(f_csv, head_instruction, *movie_info_list)

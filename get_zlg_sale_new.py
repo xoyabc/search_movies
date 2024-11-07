@@ -12,6 +12,7 @@ import csv
 import codecs
 from urllib import unquote
 import time
+from headers_config import HEADER_CONFIG
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
@@ -24,8 +25,16 @@ urllib3.disable_warnings()
 
 ticket_headers = {
     'user-agent': "Mozilla/5.0  AppleWebKit/537.36 Version/4.0 Mobile Safari/537.36 uni-app Html5Plus/1.0 (Immersed/33.893127)",
-    'Authori-zation': "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwd2QiOiJkNDFkOGNkOThmMDBiMjA0ZTk4MDA5OThlY2Y4NDI3ZSIsImlzcyI6ImFwaS5ndW95aW5namlheWluZy5jbiIsImF1ZCI6ImFwaS5ndW95aW5namlheWluZy5jbiIsImlhdCI6MTcyMTYyNDkwNywibmJmIjoxNzIxNjI0OTA3LCJleHAiOjE3NTMxNjA5MDcsImp0aSI6eyJpZCI6MTQ1NiwidHlwZSI6ImFwaSJ9fQ.sesor14ewLKctSrqFyV1MqLACVAgiVaZ8Y66J50LliA",
+    'Authori-zation': "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwd2QiOiJkNDFkOGNkOThmMDBiMjA0ZTk4MDA5OThlY2Y4NDI3ZSIsImlzcyI6ImFwaS5ndW95aW5namlheWluZy5jbiIsImF1ZCI6ImFwaS5ndW95aW5namlheWluZy5jbiIsImlhdCI6MTcyNjI3NDcyMiwibmJmIjoxNzI2Mjc0NzIyLCJleHAiOjE3NTc4MTA3MjIsImp0aSI6eyJpZCI6ODE2MzIsInR5cGUiOiJhcGkifX0.BSkVFG_TjxY2649C0YVnw-eM2soaQvH6b0VpQ-_zkc8",
     'Cookie': "cb_lang=zh-cn; PHPSESSID=ee68cbd9f743de78220e39adb8eb45da"
+    }
+ticket_headers['Authori-zation'] = HEADER_CONFIG['Authori-zation']
+ticket_headers['Cookie'] = HEADER_CONFIG['Cookie']
+
+# 请求参数
+payload = {
+    'program_id': '1003',
+    'uid': 86265
     }
 
 # write to csv file
@@ -101,23 +110,42 @@ def get_chinema_seat_info(screen_id, place_id):
 
 def get_movie_info(m_id, movieRewindingId):
     movie_info = {}
-    movie_url = 'http://api.guoyingjiaying.cn/filmcinema/getprogram_details_app?prorgam_id={0}&uid=1456' .format(m_id)  
-    res = requests.get(movie_url, headers=ticket_headers, verify=False)
+    payload['program_id'] = m_id
+    #movie_url = 'http://api.guoyingjiaying.cn/filmcinema/getprogram_details_app?prorgam_id={0}&uid=81632' .format(m_id)  
+    #res = requests.get(movie_url, headers=ticket_headers, verify=False)
+    movie_url = 'http://api.guoyingjiaying.cn/api/v3/movie/getProgramDetailsApp'
+    res = requests.request("POST", movie_url, data=payload, headers=ticket_headers)
     json_data=res.json()['data']
-    movieActorList = json_data['performer']
-    print "movieActorList:{0}" .format(movieActorList)
-    # get all director
-    movie_info['director_all'] = 'N/A' if len(movieActorList) == 0 else "/" .join([ x['real_name'].split()[0].strip() for x in movieActorList \
+    try:
+        movieActorList = json_data['performer']
+        print "movieActorList:{0}" .format(movieActorList)
+        # get all director
+        movie_info['director_all'] = 'N/A' if len(movieActorList) == 0 else "/" .join([ x['real_name'].split()[0].strip() for x in movieActorList \
                if x['position'] == '导演'.decode('utf-8') ])
+    except Exception:
+        movie_info['director_all'] = 'N/A'
     # 国家/地区
-    movie_info['regionCategoryName'] = "/" .join([ x for x in json_data['film_area_code'].split() ])
+    try:
+        movie_info['regionCategoryName'] = "/" .join([ x for x in json_data['film_area_code'].split() ])
+    except Exception:
+        movie_info['regionCategoryName'] = "N/A"
     # 语言
-    movie_info['languageCategoryName'] = "/" .join([ x for x in json_data['film_language_code'].split() ])
+    try:
+        movie_info['languageCategoryName'] = "/" .join([ x for x in json_data['film_language_code'].split() ])
+    except Exception:
+        movie_info['languageCategoryName'] = "N/A"
     # 字幕
-    movie_info['subtitle'] = '未标注' if len(json_data['film_caption_code']) == 0 else "/" .join([ x for x in json_data['film_caption_code'].split() ])
+    try:
+        movie_info['subtitle'] = '未标注' if len(json_data['film_caption_code']) == 0 else "/" .join([ x for x in json_data['film_caption_code'].split() ])
+    except Exception:
+        movie_info['subtitle'] = 'N/A'
+
     # 版本 DCP
     #movie_info['projection_material'] = 'N/A' if len(json_data['film_pformat_code']) == 0 else json_data['film_pformat_code']
-    movie_info['projection_material'] = 'N/A' if json_data['screens'][0]['screen_format'] == '' else json_data['screens'][0]['screen_format']
+    try:
+        movie_info['projection_material'] = 'N/A' if json_data['screens'][0]['screen_format'] == '' else json_data['screens'][0]['screen_format']
+    except Exception:
+        movie_info['projection_material'] = 'N/A'
     # 画幅比
     try:
         movie_info['frameRatio'] = 'N/A' if json_data['film_frameratio_code'] == '' else json_data['film_frameratio_code']
@@ -180,7 +208,7 @@ def get_detailed_schedule_info(schedule_data, cinema_list):
                                                                          week,cinema_name,movieHall,director,
                                                                          seatSold,seatTotal,sale_percent)
             movie_info_list.append(movie_info)
-            time.sleep(0 + random.randint(0, 2000)/1000) 
+            time.sleep(3 + random.randint(0, 2000)/1000)
             print cinema_name,duration,name,movieHall,poster,director
             print movie_info
 
@@ -189,9 +217,9 @@ def get_movie_detailed_info(start_day, cinema='北京总馆', lasting_days=31):
     if cinema == '北京总馆':
         cinema_list = ["小西天艺术影院 2号厅", "小西天艺术影院 1号厅", "百子湾艺术影院 1号厅"]
     elif cinema == '江南分馆':
-        cinema_list = ["江南分馆影院 1号厅", "江南分馆影院 4号厅"]
+        cinema_list = ["江南分馆影院 1号厅", "江南分馆影院 3号厅", "江南分馆影院 4号厅"]
     else:
-        cinema_list = ["小西天艺术影院 2号厅", "小西天艺术影院 1号厅", "百子湾艺术影院 1号厅", "江南分馆影院 1号厅", "江南分馆影院 4号厅"]
+        cinema_list = ["小西天艺术影院 2号厅", "小西天艺术影院 1号厅", "百子湾艺术影院 1号厅", "江南分馆影院 1号厅", "江南分馆影院 3号厅", "江南分馆影院 4号厅"]
     ts_start_day = _to_timestamp(start_day)
     ts_end_day = ts_start_day + lasting_days*24*60*60
     month_list = []
@@ -229,7 +257,7 @@ if __name__ == '__main__':
     BASEPATH = os.path.realpath(os.path.dirname(__file__))
     f_csv = BASEPATH + os.sep + 'movie.csv'
     head_instruction = "film\tdate\ttime\tweek\ttheater\tmovieHall\tdirector\tseatSold\tseatTotal\tsale_percent"
-    start_day = "2024-08-01 00:00:00"
+    start_day = "2024-12-01 00:00:00"
     if len(sys.argv) > 1:
         if sys.argv[1] == 'all':
             cinema_name = 'all'
