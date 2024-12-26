@@ -140,7 +140,8 @@ def get_schedule_info(date):
     try:
         res = requests.get(cinema_url, timeout=5, headers=ticket_headers, verify=False)
         json_data = [ j for x in res.json()['data']['list'] if len(x['screen']) >0 for j in x['screen'] ]
-    except requests.exceptions.RequestException as e:
+    #except ValueError as e:
+    except Exception as e:
         json_data = []
     print json_data
     return json_data
@@ -187,50 +188,52 @@ def get_movie_info(m_id):
     return movie_info
 
 
-def get_detailed_schedule_info(schedule_data, cinema_list):
+def get_detailed_schedule_info(schedule_data, cinema_list,ts_start_day, ts_end_day):
     for movie in schedule_data:
         if movie['screen_cinema'] in cinema_list:
-            movie_id = movie['movie_id']
-            program_id = movie['program_ids']
-            print "program_id:{}" .format(program_id)
-            name = movie['show_name']
-            screen_cinema = movie['screen_cinema']
-            cinema_name = screen_cinema.split()[0]
-            movieHall = screen_cinema.split()[1]
-            duration = movie['screen_time_len']
-            fare = int(float(movie['show_price']))
-            year = movie['film_year']
-            poster = movie['cover_img1']
-            movie_data = get_movie_info(program_id)
-            # get the first three director
-            director_all = movie_data['director_all']
-            director = 'N/A' if director_all == 'N/A' or director_all == '' \
-                       else "/" .join(director_all.split('/')[0:3])
-            # get the first three country
-            country = "/" .join(movie_data['regionCategoryName'].split('/')[0:3])
-            print "country:{0}" .format(country)
-            # get the first three language
-            language = "/" .join(movie_data['languageCategoryName'].split('/')[0:3])
-            #print "language:{0}" .format(language)
-            # get date, beginTime, endTime, week
-            playTime = movie['screen_start_time']
-            showDate_list = movie['screen_start_time'].split()[0].split('-')
-            showDate = "{0}月{1}日" .format(showDate_list[1], showDate_list[2])
-            beginTime = ":" .join(movie['screen_start_time'].split()[1].split(':')[0:2])
-            ts_start = _to_timestamp(playTime)
-            ts_endTime = duration * 60 + ts_start
-            endTime = _to_dt(ts_endTime)
-            week = get_week_day(playTime)
-            #movie_info = "{0}\t{1}\t{2}-{3}\t{4}\t{5}\t{6}\t{7}\t{8}" .format(name,showDate,beginTime,endTime,cinema_name,director,shot_year,country,poster)
-            movie_info = "{0}\t{1}\t{2}-{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}\t{11}\t{12}\t{13}\t{14}\t{15}\t{16}\t{17}" \
-                         .format(name,showDate,beginTime,endTime,week,duration,
-                                 cinema_name,movieHall,director,country,language,
-                                 movie_data['subtitle'],movie_data['projection_material'],
-                                 movie_data['frameRatio'],beginTime,fare,year,program_id)
-            movie_info_list.append(movie_info)
-            time.sleep(3 + random.randint(0, 3000)/1000) 
-            print cinema_name,duration,name,movieHall,poster,director
-            print movie_info
+            begin_ts = _to_timestamp(movie['screen_start_time'])
+            if begin_ts >= ts_start_day and begin_ts <= ts_end_day:
+                movie_id = movie['movie_id']
+                program_id = movie['program_ids']
+                print "program_id:{}" .format(program_id)
+                name = movie['show_name']
+                screen_cinema = movie['screen_cinema']
+                cinema_name = screen_cinema.split()[0]
+                movieHall = screen_cinema.split()[1]
+                duration = movie['screen_time_len']
+                fare = int(float(movie['show_price']))
+                year = movie['film_year']
+                poster = movie['cover_img1']
+                movie_data = get_movie_info(program_id)
+                # get the first three director
+                director_all = movie_data['director_all']
+                director = 'N/A' if director_all == 'N/A' or director_all == '' \
+                           else "/" .join(director_all.split('/')[0:3])
+                # get the first three country
+                country = "/" .join(movie_data['regionCategoryName'].split('/')[0:3])
+                print "country:{0}" .format(country)
+                # get the first three language
+                language = "/" .join(movie_data['languageCategoryName'].split('/')[0:3])
+                #print "language:{0}" .format(language)
+                # get date, beginTime, endTime, week
+                playTime = movie['screen_start_time']
+                showDate_list = movie['screen_start_time'].split()[0].split('-')
+                showDate = "{0}月{1}日" .format(showDate_list[1], showDate_list[2])
+                beginTime = ":" .join(movie['screen_start_time'].split()[1].split(':')[0:2])
+                ts_start = _to_timestamp(playTime)
+                ts_endTime = duration * 60 + ts_start
+                endTime = _to_dt(ts_endTime)
+                week = get_week_day(playTime)
+                #movie_info = "{0}\t{1}\t{2}-{3}\t{4}\t{5}\t{6}\t{7}\t{8}" .format(name,showDate,beginTime,endTime,cinema_name,director,shot_year,country,poster)
+                movie_info = "{0}\t{1}\t{2}-{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}\t{11}\t{12}\t{13}\t{14}\t{15}\t{16}\t{17}" \
+                             .format(name,showDate,beginTime,endTime,week,duration,
+                                     cinema_name,movieHall,director,country,language,
+                                     movie_data['subtitle'],movie_data['projection_material'],
+                                     movie_data['frameRatio'],beginTime,fare,year,program_id)
+                movie_info_list.append(movie_info)
+                time.sleep(3 + random.randint(0, 3000)/1000) 
+                print cinema_name,duration,name,movieHall,poster,director
+                print movie_info
 
 
 def judge_list_dup_element(list_name, n, v=0):
@@ -259,7 +262,7 @@ def get_movie_detailed_info(start_day, cinema='北京总馆', lasting_days=31):
         if month not in month_list:
             schedule_data = get_schedule_info(month)
             if len(schedule_data) > 0:
-                get_detailed_schedule_info(schedule_data, cinema_list)
+                get_detailed_schedule_info(schedule_data, cinema_list,ts_start_day, ts_end_day)
         month_list.insert(0, month)
         ts_start_day += 86400
     return movie_info_list
@@ -277,7 +280,7 @@ def get_schedule_list():
         day_num = int(day)
         if day_num == 1:
             s_day = "{0}-{1}-{2} 00:00:00" .format(year, mon, day)
-            movie_info_list = get_movie_detailed_info(s_day)
+            movie_info_list = get_movie_detailed_info(s_day, cinema_name)
             # add file suffix
             write_to_csv(f_csv+'.'+year+mon, head_instruction, *movie_info_list)
 
@@ -288,7 +291,7 @@ if __name__ == '__main__':
     BASEPATH = os.path.realpath(os.path.dirname(__file__))
     f_csv = BASEPATH + os.sep + 'movie.csv'
     head_instruction = "film\tdate\ttime\tweek\tduration\ttheater\tmovieHall\tdirector\tcountry\tlanguage\tsubtitle\tprojection_material\tframeRatio\tplayTime\tfare\tyear\tprogram_id"
-    start_day = "2024-11-1 00:00:00"
+    start_day = "2025-01-01 00:00:00"
     if len(sys.argv) > 1:
         if sys.argv[1] == 'all':
             cinema_name = 'all'
@@ -296,7 +299,7 @@ if __name__ == '__main__':
             cinema_name = '江南分馆'
     else:
         cinema_name = '北京总馆'
-    movie_info_list = get_movie_detailed_info(start_day, cinema_name, 31) # lasting_days
+    movie_info_list = get_movie_detailed_info(start_day, cinema_name, 62) # lasting_days
     write_to_csv(f_csv, head_instruction, *movie_info_list)
     write_to_excel(*movie_info_list)
     sys.exit(0)
