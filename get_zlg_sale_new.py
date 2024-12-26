@@ -157,8 +157,9 @@ def get_movie_info(m_id, movieRewindingId):
         #print "cinema_info: {}" .format(cinema_info)
         info_id = cinema_info['id']
         place_id = cinema_info['place_id']
-        if info_id == movieRewindingId:
-            seat_data = get_chinema_seat_info(movieRewindingId, place_id)
+        seat_data = get_chinema_seat_info(movieRewindingId, place_id)
+        if info_id == movieRewindingId and len(seat_data) > 0:
+            #print (seat_data)
             print "info_id {0} {1}" .format(info_id, movieRewindingId)
             print "seatTotal: {}" .format(seat_data['seat_count'])
             # 售卖情况
@@ -167,50 +168,54 @@ def get_movie_info(m_id, movieRewindingId):
     return movie_info
 
 
-def get_detailed_schedule_info(schedule_data, cinema_list):
+def get_detailed_schedule_info(schedule_data, cinema_list, ts_start_day, ts_end_day):
     for movie in schedule_data:
-        if movie['screen_cinema'] in cinema_list:
-            movie_id = movie['movie_id']
+        begin_ts = _to_timestamp(movie['screen_start_time'])
+        if begin_ts >= ts_start_day and begin_ts <= ts_end_day:
             program_id = movie['program_ids']
             movieRewindingId = movie['id']
-            print "program_id:{}" .format(program_id)
-            print "movieRewindingId:{}" .format(movieRewindingId)
-            name = movie['show_name']
-            screen_cinema = movie['screen_cinema']
-            cinema_name = screen_cinema.split()[0]
-            movieHall = screen_cinema.split()[1]
-            duration = movie['screen_time_len']
-            poster = movie['cover_img1']
             movie_data = get_movie_info(program_id, movieRewindingId)
-            # get the first three director
-            director = "/" .join(movie_data['director_all'].split('/')[0:3])
-            # get the first three country
-            country = "/" .join(movie_data['regionCategoryName'].split('/')[0:3])
-            print "country:{0}" .format(country)
-            # get sale info
-            #seatTotal = int(movie_data['seatTotal'])
-            #seatSold = int(movie_data['seatSold'])
-            seatTotal = 'N/A' if movie_data['seatTotal'] == None else int(movie_data['seatTotal'])
-            seatSold = 'N/A' if movie_data['seatSold'] == None else int(movie_data['seatSold'])
-            sale_percent = 'N/A' if movie_data['seatTotal'] == None else '{:.0%}'.format(float(seatSold) / float(seatTotal))
-            # get date, beginTime, endTime, week
-            playTime = movie['screen_start_time']
-            showDate_list = movie['screen_start_time'].split()[0].split('-')
-            showDate = "{0}月{1}日" .format(showDate_list[1], showDate_list[2])
-            beginTime = ":" .join(movie['screen_start_time'].split()[1].split(':')[0:2])
-            ts_start = _to_timestamp(playTime)
-            ts_endTime = duration * 60 + ts_start
-            endTime = _to_dt(ts_endTime)
-            week = get_week_day(playTime)
-            #movie_info = "{0}\t{1}\t{2}-{3}\t{4}\t{5}\t{6}\t{7}\t{8}" .format(name,showDate,beginTime,endTime,cinema_name,director,shot_year,country,poster)
-            movie_info = "{0}\t{1}\t{2}-{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}" \
-                                                                 .format(name,showDate,beginTime,endTime,
-                                                                         week,cinema_name,movieHall,director,
-                                                                         seatSold,seatTotal,sale_percent)
-            movie_info_list.append(movie_info)
-            time.sleep(3 + random.randint(0, 2000)/1000)
-            print cinema_name,duration,name,movieHall,poster,director
-            print movie_info
+            if movie['screen_cinema'] in cinema_list and movie_data.has_key('seatTotal'):
+                movie_id = movie['movie_id']
+                print "program_id:{}" .format(program_id)
+                print "movieRewindingId:{}" .format(movieRewindingId)
+                name = movie['show_name']
+                screen_cinema = movie['screen_cinema']
+                cinema_name = screen_cinema.split()[0]
+                movieHall = screen_cinema.split()[1]
+                duration = movie['screen_time_len']
+                fare = int(float(movie['show_price']))
+                poster = movie['cover_img1']
+                # get the first three director
+                director = "/" .join(movie_data['director_all'].split('/')[0:3])
+                # get the first three country
+                country = "/" .join(movie_data['regionCategoryName'].split('/')[0:3])
+                print "country:{0}" .format(country)
+                # get sale info
+                #seatTotal = int(movie_data['seatTotal'])
+                #seatSold = int(movie_data['seatSold'])
+                seatTotal = 'N/A' if movie_data['seatTotal'] == None else int(movie_data['seatTotal'])
+                seatSold = 0 if movie_data['seatSold'] == None else int(movie_data['seatSold'])
+                sale_percent = 'N/A' if movie_data['seatTotal'] == None else '{:.0%}'.format(float(seatSold) / float(seatTotal))
+                saleSold = fare * seatSold
+                # get date, beginTime, endTime, week
+                playTime = movie['screen_start_time']
+                showDate_list = movie['screen_start_time'].split()[0].split('-')
+                showDate = "{0}月{1}日" .format(showDate_list[1], showDate_list[2])
+                beginTime = ":" .join(movie['screen_start_time'].split()[1].split(':')[0:2])
+                ts_start = _to_timestamp(playTime)
+                ts_endTime = duration * 60 + ts_start
+                endTime = _to_dt(ts_endTime)
+                week = get_week_day(playTime)
+                #movie_info = "{0}\t{1}\t{2}-{3}\t{4}\t{5}\t{6}\t{7}\t{8}" .format(name,showDate,beginTime,endTime,cinema_name,director,shot_year,country,poster)
+                movie_info = "{0}\t{1}\t{2}-{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}\t{11}" \
+                                                                     .format(name,showDate,beginTime,endTime,
+                                                                             week,cinema_name,movieHall,director,
+                                                                             seatSold,seatTotal,sale_percent,saleSold)
+                movie_info_list.append(movie_info)
+                time.sleep(5 + random.randint(0, 2000)/1000)
+                print cinema_name,duration,name,movieHall,poster,director
+                print movie_info
 
 
 def get_movie_detailed_info(start_day, cinema='北京总馆', lasting_days=31):
@@ -228,7 +233,7 @@ def get_movie_detailed_info(start_day, cinema='北京总馆', lasting_days=31):
         if month not in month_list:
             schedule_data = get_schedule_info(month)
             if len(schedule_data) > 0:
-                get_detailed_schedule_info(schedule_data, cinema_list)
+                get_detailed_schedule_info(schedule_data, cinema_list, ts_start_day, ts_end_day)
         month_list.insert(0, month)
         ts_start_day += 86400
     return movie_info_list
@@ -246,7 +251,7 @@ def get_schedule_list():
         day_num = int(day)
         if day_num == 1:
             s_day = "{0}-{1}-{2} 00:00:00" .format(year, mon, day)
-            movie_info_list = get_movie_detailed_info(s_day)
+            movie_info_list = get_movie_detailed_info(s_day, cinema_name)
             # add file suffix
             write_to_csv(f_csv+'.'+year+mon, head_instruction, *movie_info_list)
 
@@ -256,8 +261,8 @@ if __name__ == '__main__':
     # write to movie.csv
     BASEPATH = os.path.realpath(os.path.dirname(__file__))
     f_csv = BASEPATH + os.sep + 'movie.csv'
-    head_instruction = "film\tdate\ttime\tweek\ttheater\tmovieHall\tdirector\tseatSold\tseatTotal\tsale_percent"
-    start_day = "2024-12-01 00:00:00"
+    head_instruction = "film\tdate\ttime\tweek\ttheater\tmovieHall\tdirector\tseatSold\tseatTotal\tsale_percent\tsaleSold"
+    start_day = "2025-02-23 00:00:00"
     if len(sys.argv) > 1:
         if sys.argv[1] == 'all':
             cinema_name = 'all'
@@ -265,7 +270,8 @@ if __name__ == '__main__':
             cinema_name = '江南分馆'
     else:
         cinema_name = '北京总馆'
-    movie_info_list = get_movie_detailed_info(start_day, cinema_name, 31)
-    write_to_csv(f_csv, head_instruction, *movie_info_list)
+    movie_info_list = get_movie_detailed_info(start_day, cinema_name, 1)
+    if len(movie_info_list) >0:
+        write_to_csv(f_csv, head_instruction, *movie_info_list)
     sys.exit(0)
     get_schedule_list()
