@@ -224,10 +224,16 @@ def test_v2():
     input_excel_path = "./zlg_schedule.xlsx"
     output_excel_path = "./中国电影资料馆片单.xlsx"
     output_excel_path_jnfg = "./中国电影资料馆片单_江南分馆.xlsx"
-    movie_list = parse_movie_excel(input_excel_path, ["小西天艺术影院", "百子湾艺术影院"])
-    movie_list_jnfg = parse_movie_excel(input_excel_path, ['江南分馆影院'])
-    output_movie_excel(movie_list, output_excel_path)
-    output_movie_excel(movie_list_jnfg, output_excel_path_jnfg)
+    try:
+        movie_list = parse_movie_excel(input_excel_path, ["小西天艺术影院", "百子湾艺术影院"])
+        output_movie_excel(movie_list, output_excel_path)
+    except Exception as e:
+        pass
+    try:
+        movie_list_jnfg = parse_movie_excel(input_excel_path, ['江南分馆影院'])
+        output_movie_excel(movie_list_jnfg, output_excel_path_jnfg)
+    except Exception as e:
+        pass
 
 
 if __name__ == '__main__':
