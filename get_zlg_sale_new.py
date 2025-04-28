@@ -102,9 +102,15 @@ def get_schedule_info(date):
 
 
 def get_chinema_seat_info(screen_id, place_id):
+    json_data = {}
     movie_url = 'http://api.guoyingjiaying.cn/filmcinema/getchinema_seat?screen_id={0}&place_id={1}' .format(screen_id, place_id)
     res = requests.get(movie_url, headers=ticket_headers, verify=False)
-    json_data=res.json()['data']['restmap']
+    #print "res.status_code: {0}" .format(res.status_code)
+    try:
+        json_data=res.json()['data']['restmap']
+    except Exception as e:
+        json_data ['seat_count'] = ''
+        json_data ['sold_count'] = ''
     return json_data
 
 
@@ -114,6 +120,7 @@ def get_movie_info(m_id, movieRewindingId):
     #movie_url = 'http://api.guoyingjiaying.cn/filmcinema/getprogram_details_app?prorgam_id={0}&uid=81632' .format(m_id)  
     #res = requests.get(movie_url, headers=ticket_headers, verify=False)
     movie_url = 'http://api.guoyingjiaying.cn/api/v3/movie/getProgramDetailsApp'
+    #print "payload and ticket_headers:{0} {1}" .format(payload, ticket_headers)
     res = requests.request("POST", movie_url, data=payload, headers=ticket_headers)
     json_data=res.json()['data']
     try:
@@ -158,9 +165,11 @@ def get_movie_info(m_id, movieRewindingId):
         info_id = cinema_info['id']
         place_id = cinema_info['place_id']
         seat_data = get_chinema_seat_info(movieRewindingId, place_id)
+        print "movieRewindingId: {0}" .format(movieRewindingId)
+        print "place_id: {0}" .format(place_id)
         if info_id == movieRewindingId and len(seat_data) > 0:
             #print (seat_data)
-            print "info_id {0} {1}" .format(info_id, movieRewindingId)
+            print "info_id and movieRewindingId: {0} {1}" .format(info_id, movieRewindingId)
             print "seatTotal: {}" .format(seat_data['seat_count'])
             # 售卖情况
             movie_info['seatTotal'] = 'N/A' if seat_data['seat_count'] == '' else seat_data['seat_count']
@@ -262,7 +271,7 @@ if __name__ == '__main__':
     BASEPATH = os.path.realpath(os.path.dirname(__file__))
     f_csv = BASEPATH + os.sep + 'movie.csv'
     head_instruction = "film\tdate\ttime\tweek\ttheater\tmovieHall\tdirector\tseatSold\tseatTotal\tsale_percent\tsaleSold"
-    start_day = "2025-02-23 00:00:00"
+    start_day = "2025-05-01 00:00:00"
     if len(sys.argv) > 1:
         if sys.argv[1] == 'all':
             cinema_name = 'all'
@@ -270,7 +279,7 @@ if __name__ == '__main__':
             cinema_name = '江南分馆'
     else:
         cinema_name = '北京总馆'
-    movie_info_list = get_movie_detailed_info(start_day, cinema_name, 1)
+    movie_info_list = get_movie_detailed_info(start_day, cinema_name, 15)
     if len(movie_info_list) >0:
         write_to_csv(f_csv, head_instruction, *movie_info_list)
     sys.exit(0)
