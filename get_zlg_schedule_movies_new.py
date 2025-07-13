@@ -135,7 +135,7 @@ def get_schedule_info(date):
     #millis = int(round(time.time() * 1000))
     year = date.split('/')[0]
     month = date.split('/')[1]
-    cinema_url = 'http://api.guoyingjiaying.cn/filmcinema/getcalendar?year={0}&month={1}&cinema_code=' .format(year, month)
+    cinema_url = 'https://api.guoyingjiaying.cn/filmcinema/getcalendar?year={0}&month={1}&cinema_code=' .format(year, month)
     print "cinema_url:{}" .format(cinema_url)
     try:
         res = requests.get(cinema_url, timeout=5, headers=ticket_headers, verify=False)
@@ -152,9 +152,9 @@ def get_schedule_info(date):
 def get_movie_info(m_id):
     movie_info = {}
     payload['program_id'] = m_id
-    #movie_url = 'http://api.guoyingjiaying.cn/filmcinema/getprogram_details_app?prorgam_id={0}&uid=81632' .format(m_id)  
+    #movie_url = 'https://api.guoyingjiaying.cn/filmcinema/getprogram_details_app?prorgam_id={0}&uid=81632' .format(m_id)  
     #res = requests.get(movie_url, headers=ticket_headers, verify=False)
-    movie_url = 'http://api.guoyingjiaying.cn/api/v3/movie/getProgramDetailsApp'
+    movie_url = 'https://api.guoyingjiaying.cn/api/v3/movie/getProgramDetailsApp'
     res = requests.request("POST", movie_url, data=payload, headers=ticket_headers)
     json_data=res.json()['data']
     try:
@@ -291,7 +291,7 @@ if __name__ == '__main__':
     BASEPATH = os.path.realpath(os.path.dirname(__file__))
     f_csv = BASEPATH + os.sep + 'movie.csv'
     head_instruction = "film\tdate\ttime\tweek\tduration\ttheater\tmovieHall\tdirector\tcountry\tlanguage\tsubtitle\tprojection_material\tframeRatio\tplayTime\tfare\tyear\tprogram_id"
-    start_day = "2025-01-01 00:00:00"
+    start_day = "2025-08-01 00:00:00"
     if len(sys.argv) > 1:
         if sys.argv[1] == 'all':
             cinema_name = 'all'
@@ -299,7 +299,7 @@ if __name__ == '__main__':
             cinema_name = '江南分馆'
     else:
         cinema_name = '北京总馆'
-    movie_info_list = get_movie_detailed_info(start_day, cinema_name, 62) # lasting_days
+    movie_info_list = get_movie_detailed_info(start_day, cinema_name, 3) # lasting_days
     write_to_csv(f_csv, head_instruction, *movie_info_list)
     write_to_excel(*movie_info_list)
     sys.exit(0)

@@ -69,8 +69,8 @@ def _to_day(ts):
 def get_movie_info(m_id):
     movie_info = {}
     payload['program_id'] = m_id
-    movie_url = 'http://api.guoyingjiaying.cn/api/v3/movie/getProgramDetailsApp'
-    #movie_url = 'http://api.guoyingjiaying.cn/filmcinema/getprogram_details_app?prorgam_id={0}&uid=81632' .format(m_id)  
+    movie_url = 'https://api.guoyingjiaying.cn/api/v3/movie/getProgramDetailsApp'
+    #movie_url = 'https://api.guoyingjiaying.cn/filmcinema/getprogram_details_app?prorgam_id={0}&uid=81632' .format(m_id)  
     #movie_LibrryInfo_url = 'https://yt5.cfa.org.cn/v5/api/movie/movieLibrryInfo/{0}' .format(m_id)
     #movieActorList_url = 'https://yt5.cfa.org.cn/v5/api/movie/movieActorList/{0}' .format(m_id)
     #res = requests.get(movie_url, headers=ticket_headers, verify=False)
@@ -150,5 +150,5 @@ if __name__ == '__main__':
     f_csv = BASEPATH + os.sep + 'movie.csv'
     head_instruction = "movie_id\tfilm\tcountry\tyear\tdirector\tduration\tcolor\tlanguage\tsubtitle\tframeRatio"
     #movie_info_list = get_movie_detailed_info(2409, 2450)
-    movie_info_list = get_movie_detailed_info(2530, 2550)
+    movie_info_list = get_movie_detailed_info(3025, 3060)
     write_to_csv(f_csv, head_instruction, *movie_info_list)
