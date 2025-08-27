@@ -26,6 +26,7 @@ urllib3.disable_warnings()
 #    }
 
 ticket_headers = {
+    'Form-type': 'app',
     'user-agent': "Mozilla/5.0  AppleWebKit/537.36 Version/4.0 Mobile Safari/537.36 uni-app Html5Plus/1.0 (Immersed/33.893127)",
     'Authori-zation': "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJwd2QiOiJkNDFkOGNkOThmMDBiMjA0ZTk4MDA5OThlY2Y4NDI3ZSIsImlzcyI6ImFwaS5ndW95aW5namlheWluZy5jbiIsImF1ZCI6ImFwaS5ndW95aW5namlheWluZy5jbiIsImlhdCI6MTcyNjI3NDcyMiwibmJmIjoxNzI2Mjc0NzIyLCJleHAiOjE3NTc4MTA3MjIsImp0aSI6eyJpZCI6ODE2MzIsInR5cGUiOiJhcGkifX0.BSkVFG_TjxY2649C0YVnw-eM2soaQvH6b0VpQ-_zkc8",
     'Cookie': "cb_lang=zh-cn; PHPSESSID=ee68cbd9f743de78220e39adb8eb45da"
@@ -37,6 +38,12 @@ ticket_headers['Cookie'] = HEADER_CONFIG['Cookie']
 payload = {
     'program_id': '1003',
     'uid': 86265
+    }
+
+calendar_payload = {
+    'year': '2025',
+    'month': '09',
+    'cinema_code': ''
     }
 
 # force the number in list to int or float
@@ -135,10 +142,14 @@ def get_schedule_info(date):
     #millis = int(round(time.time() * 1000))
     year = date.split('/')[0]
     month = date.split('/')[1]
-    cinema_url = 'https://api.guoyingjiaying.cn/filmcinema/getcalendar?year={0}&month={1}&cinema_code=' .format(year, month)
-    print "cinema_url:{}" .format(cinema_url)
+    #cinema_url = 'https://api.guoyingjiaying.cn/filmcinema/getcalendar?year={0}&month={1}&cinema_code=' .format(year, month)
+    #print "cinema_url:{}" .format(cinema_url)
+    calendar_payload['year'] = year
+    calendar_payload['month'] = month
+    cinema_url = 'https://api.guoyingjiaying.cn/api/v3/movie/getCalendar'
     try:
-        res = requests.get(cinema_url, timeout=5, headers=ticket_headers, verify=False)
+        res = requests.request("POST", cinema_url, timeout=5, data=calendar_payload, headers=ticket_headers)
+        #res = requests.get(cinema_url, timeout=5, headers=ticket_headers, verify=False)
         json_data = [ j for x in res.json()['data']['list'] if len(x['screen']) >0 for j in x['screen'] ]
     #except ValueError as e:
     except Exception as e:
@@ -193,7 +204,7 @@ def get_detailed_schedule_info(schedule_data, cinema_list,ts_start_day, ts_end_d
         if movie['screen_cinema'] in cinema_list:
             begin_ts = _to_timestamp(movie['screen_start_time'])
             if begin_ts >= ts_start_day and begin_ts <= ts_end_day:
-                movie_id = movie['movie_id']
+                movie_id = movie['id']
                 program_id = movie['program_ids']
                 print "program_id:{}" .format(program_id)
                 name = movie['show_name']
@@ -291,7 +302,7 @@ if __name__ == '__main__':
     BASEPATH = os.path.realpath(os.path.dirname(__file__))
     f_csv = BASEPATH + os.sep + 'movie.csv'
     head_instruction = "film\tdate\ttime\tweek\tduration\ttheater\tmovieHall\tdirector\tcountry\tlanguage\tsubtitle\tprojection_material\tframeRatio\tplayTime\tfare\tyear\tprogram_id"
-    start_day = "2025-08-01 00:00:00"
+    start_day = "2025-09-01 00:00:00"
     if len(sys.argv) > 1:
         if sys.argv[1] == 'all':
             cinema_name = 'all'
@@ -299,7 +310,7 @@ if __name__ == '__main__':
             cinema_name = '江南分馆'
     else:
         cinema_name = '北京总馆'
-    movie_info_list = get_movie_detailed_info(start_day, cinema_name, 3) # lasting_days
+    movie_info_list = get_movie_detailed_info(start_day, cinema_name, 30) # lasting_days
     write_to_csv(f_csv, head_instruction, *movie_info_list)
     write_to_excel(*movie_info_list)
     sys.exit(0)
