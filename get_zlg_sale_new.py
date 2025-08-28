@@ -37,6 +37,18 @@ payload = {
     'uid': 86265
     }
 
+calendar_payload = {
+    'year': '2025',
+    'month': '09',
+    'cinema_code': ''
+    }
+
+seat_payload = {
+    'screen_id': 12993,
+    'place_id': 3588
+    }
+
+
 # write to csv file
 def write_to_csv(filename, head_line, *info_list):
     with open(filename, 'w') as f:
@@ -90,10 +102,14 @@ def get_schedule_info(date):
     #millis = int(round(time.time() * 1000))
     year = date.split('/')[0]
     month = date.split('/')[1]
-    cinema_url = 'https://api.guoyingjiaying.cn/filmcinema/getcalendar?year={0}&month={1}&cinema_code=' .format(year, month)
-    print "cinema_url:{}" .format(cinema_url)
+    #cinema_url = 'https://api.guoyingjiaying.cn/filmcinema/getcalendar?year={0}&month={1}&cinema_code=' .format(year, month)
+    #print "cinema_url:{}" .format(cinema_url)
+    calendar_payload['year'] = year
+    calendar_payload['month'] = month
+    cinema_url = 'https://api.guoyingjiaying.cn/api/v3/movie/getCalendar'
     try:
-        res = requests.get(cinema_url, timeout=5, headers=ticket_headers, verify=False)
+        res = requests.request("POST", cinema_url, timeout=5, data=calendar_payload, headers=ticket_headers)
+        #res = requests.get(cinema_url, timeout=5, headers=ticket_headers, verify=False)
         json_data = [ j for x in res.json()['data']['list'] if len(x['screen']) >0 for j in x['screen'] ]
     except requests.exceptions.RequestException as e:
         json_data = []
@@ -103,8 +119,12 @@ def get_schedule_info(date):
 
 def get_chinema_seat_info(screen_id, place_id):
     json_data = {}
-    movie_url = 'https://api.guoyingjiaying.cn/filmcinema/getchinema_seat?screen_id={0}&place_id={1}' .format(screen_id, place_id)
-    res = requests.get(movie_url, headers=ticket_headers, verify=False)
+    #movie_url = 'https://api.guoyingjiaying.cn/filmcinema/getchinema_seat?screen_id={0}&place_id={1}' .format(screen_id, place_id)
+    #res = requests.get(movie_url, headers=ticket_headers, verify=False)
+    seat_payload['screen_id'] = screen_id
+    seat_payload['place_id'] = place_id
+    movie_url = 'https://api.guoyingjiaying.cn/api/v3/movie/getCinemaSeat'
+    res = requests.request("POST", movie_url, timeout=5, data=seat_payload, headers=ticket_headers)
     #print "res.status_code: {0}" .format(res.status_code)
     try:
         json_data=res.json()['data']['restmap']
@@ -165,6 +185,7 @@ def get_movie_info(m_id, movieRewindingId):
         info_id = cinema_info['id']
         place_id = cinema_info['place_id']
         seat_data = get_chinema_seat_info(movieRewindingId, place_id)
+        #print "seat_data: {0}" .format(seat_data)
         print "movieRewindingId: {0}" .format(movieRewindingId)
         print "place_id: {0}" .format(place_id)
         if info_id == movieRewindingId and len(seat_data) > 0:
@@ -185,7 +206,7 @@ def get_detailed_schedule_info(schedule_data, cinema_list, ts_start_day, ts_end_
             movieRewindingId = movie['id']
             movie_data = get_movie_info(program_id, movieRewindingId)
             if movie['screen_cinema'] in cinema_list and movie_data.has_key('seatTotal'):
-                movie_id = movie['movie_id']
+                #movie_id = movie['movie_id']
                 print "program_id:{}" .format(program_id)
                 print "movieRewindingId:{}" .format(movieRewindingId)
                 name = movie['show_name']
@@ -271,7 +292,7 @@ if __name__ == '__main__':
     BASEPATH = os.path.realpath(os.path.dirname(__file__))
     f_csv = BASEPATH + os.sep + 'movie.csv'
     head_instruction = "film\tdate\ttime\tweek\ttheater\tmovieHall\tdirector\tseatSold\tseatTotal\tsale_percent\tsaleSold"
-    start_day = "2025-07-01 00:00:00"
+    start_day = "2025-09-01 00:00:00"
     if len(sys.argv) > 1:
         if sys.argv[1] == 'all':
             cinema_name = 'all'
