@@ -80,14 +80,14 @@ def write_to_excel(*info_list):
     for i in range(len(host_tag_lists)):
         ws.append(wb.create_sheet(title=host_tag_lists[i]))  # utf8->unicode
     # insert sheet header
-    ws[0].append(['film', 'date', 'time', 'week', 'duration', 'year', 'fare', 'theater', 'movieHall', 'country', 'director', 'language', 'subtitle', 'projection_material', 'frameRatio'])
+    ws[0].append(['film', 'date', 'time', 'week', 'duration', 'year', 'fare', 'theater', 'movieHall', 'country', 'director', 'language', 'subtitle', 'projection_material', 'frameRatio', 'color'])
     #ws[1].append(['日期', '星期', '放映时间', '片名', '国家', '导演', '时长', '影院', '影厅', '票价'])
     ws[1].append(['日期', '星期', '放映时间', '影片信息', '时长', '影院', '影厅', '票价'])
     for row in info_list:
         row_info = row.split('\t')
         row_list = convert_list_format(row_info[0:5] \
                                       + row_info[15:13:-1] + row_info[5:7] \
-                                      + row_info[8:6:-1] + row_info[9:13])
+                                      + row_info[8:6:-1] + row_info[9:13] + row_info[17:])
         theater = row_info[5].replace('艺术影院', '')
         movie_info = row_info[0] + '\n' + row_info[15] + '\n' \
                      + row_info[8] + ' | ' + row_info[7]
@@ -196,6 +196,12 @@ def get_movie_info(m_id):
         movie_info['frameRatio'] = 'N/A' if json_data['film_frameratio_code'] == '' else json_data['film_frameratio_code'].strip()
     except Exception:
         movie_info['frameRatio'] = 'N/A'
+    # 色彩
+    try:
+        movie_info['color'] = 'N/A' if json_data['film_color_code'] == '' else json_data['film_color_code'].strip()
+    except Exception:
+        movie_info['color'] = 'N/A'
+
     return movie_info
 
 
@@ -236,11 +242,11 @@ def get_detailed_schedule_info(schedule_data, cinema_list,ts_start_day, ts_end_d
                 endTime = _to_dt(ts_endTime)
                 week = get_week_day(playTime)
                 #movie_info = "{0}\t{1}\t{2}-{3}\t{4}\t{5}\t{6}\t{7}\t{8}" .format(name,showDate,beginTime,endTime,cinema_name,director,shot_year,country,poster)
-                movie_info = "{0}\t{1}\t{2}-{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}\t{11}\t{12}\t{13}\t{14}\t{15}\t{16}\t{17}" \
+                movie_info = "{0}\t{1}\t{2}-{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}\t{11}\t{12}\t{13}\t{14}\t{15}\t{16}\t{17}\t{18}" \
                              .format(name,showDate,beginTime,endTime,week,duration,
                                      cinema_name,movieHall,director,country,language,
                                      movie_data['subtitle'],movie_data['projection_material'],
-                                     movie_data['frameRatio'],beginTime,fare,year,program_id)
+                                     movie_data['frameRatio'],beginTime,fare,year,program_id,movie_data['color'])
                 movie_info_list.append(movie_info)
                 time.sleep(3 + random.randint(0, 3000)/1000) 
                 print cinema_name,duration,name,movieHall,poster,director
@@ -301,8 +307,8 @@ if __name__ == '__main__':
     # write to movie.csv
     BASEPATH = os.path.realpath(os.path.dirname(__file__))
     f_csv = BASEPATH + os.sep + 'movie.csv'
-    head_instruction = "film\tdate\ttime\tweek\tduration\ttheater\tmovieHall\tdirector\tcountry\tlanguage\tsubtitle\tprojection_material\tframeRatio\tplayTime\tfare\tyear\tprogram_id"
-    start_day = "2025-09-01 00:00:00"
+    head_instruction = "film\tdate\ttime\tweek\tduration\ttheater\tmovieHall\tdirector\tcountry\tlanguage\tsubtitle\tprojection_material\tframeRatio\tplayTime\tfare\tyear\tprogram_id\tcolor"
+    start_day = "2025-10-05 00:00:00"
     if len(sys.argv) > 1:
         if sys.argv[1] == 'all':
             cinema_name = 'all'
@@ -310,7 +316,7 @@ if __name__ == '__main__':
             cinema_name = '江南分馆'
     else:
         cinema_name = '北京总馆'
-    movie_info_list = get_movie_detailed_info(start_day, cinema_name, 30) # lasting_days
+    movie_info_list = get_movie_detailed_info(start_day, cinema_name, 1) # lasting_days
     write_to_csv(f_csv, head_instruction, *movie_info_list)
     write_to_excel(*movie_info_list)
     sys.exit(0)
