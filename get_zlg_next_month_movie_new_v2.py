@@ -49,7 +49,7 @@ def write_to_csv(filename, head_line, *info_list):
             #        name_list.append(x.split(',')[2]) 
             #name_list = [ x.split(',')[2] for x in f if len(x.split(',')) > 1 ]
             name_list = [ x.split(',')[2] for x in f if len(x.split(',')) > 1 ]
-            print name_list
+            #print name_list
     with open(filename, 'a+') as f:
         f.write(codecs.BOM_UTF8)
         writer = csv.writer(f)
@@ -100,7 +100,7 @@ def get_movie_info(m_id):
     #LibrryInfo_data = requests.get(movie_LibrryInfo_url, headers=ticket_headers, verify=False).json()['data']
     #movieActorList = requests.get(movieActorList_url, headers=ticket_headers, verify=False).json()['data']
     movieActorList = json_data['performer']
-    print "movieActorList:{0}" .format(movieActorList)
+    #print "movieActorList:{0}" .format(movieActorList)
     movie_info['movieId'] = json_data['id']
     movie_info['name'] = json_data['cn_name']
     movie_info['year'] = json_data['years_content']
@@ -164,12 +164,13 @@ def get_movie_detailed_info(today):
     name_payload = {'cn_name': '共同的语言'}
     movie_url = "https://api.guoyingjiaying.cn/api/v3/movie/searchMovie"
     program_ids = []
+    picture_originals = []
     with open("zlg_dict.txt", "r") as f:
         # 逐行遍历
         for line in f:
             # 去除每行末尾的换行符（可选）
             line = line.strip()
-            print line
+            #print line
             # 处理每行内容
             name_payload['cn_name'] = line
             res = requests.request("POST", movie_url, json=name_payload, headers=ticket_headers)
@@ -177,8 +178,9 @@ def get_movie_detailed_info(today):
                 json_data = res.json()['data']
                 if json_data['list'] > 0:
                     for x in json_data['list']:
-                        if today in x['create_time'] and not x['id'] in program_ids:
+                        if today in x['create_time'] and not x['picture_original'] in picture_originals:
                             program_ids.append(x['id'])
+                            picture_originals.append(x['picture_original'])
             except Exception:
                 pass
             time.sleep(random.randint(3, 5))
