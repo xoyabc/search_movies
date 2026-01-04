@@ -38,6 +38,50 @@ payload = {
     'uid': 86265
     }
 
+
+def random_select_lines(source_file, target_file, select_num):
+    """
+    从源文件中随机选取指定行数，写入目标文件
+    :param source_file: 源文件路径（字符串）
+    :param target_file: 目标文件路径（字符串）
+    :param select_num: 要选取的行数（整数）
+    :return: 成功返回True，失败返回False
+    """
+    try:
+        # 1. 读取源文件所有行，清理空行
+        with open(source_file, "r") as f:
+            # 过滤空行并清理首尾空白
+            all_lines = [line.strip() for line in f if line.strip()]
+        
+        # 2. 校验行数是否足够
+        if len(all_lines) < select_num:
+            raise ValueError(u"源文件仅包含 %d 行有效内容，不足 %d 行！" % (len(all_lines), select_num))
+        
+        # 3. 随机选择指定行数（不重复）
+        random_lines = random.sample(all_lines, select_num)
+        
+        # 4. 写入目标文件
+        with open(target_file, "w") as f:
+            for line in random_lines:
+                f.write(line + "\n")
+        
+        # 打印成功信息
+        print(u"✅ 操作成功！")
+        print(u"📄 源文件：%s（有效行数：%d）" % (source_file, len(all_lines)))
+        print(u"💾 目标文件：%s（写入行数：%d）" % (target_file, select_num))
+        return True
+
+    except IOError:  # Python2捕获文件不存在/读写异常
+        print(u"❌ 错误：文件 %s 不存在或无读写权限，请检查路径！" % source_file)
+        return False
+    except ValueError as e:
+        print(u"❌ 错误：%s" % e)
+        return False
+    except Exception as e:
+        print(u"❌ 未知错误：%s" % str(e))
+        return False
+
+
 # write to csv file
 def write_to_csv(filename, head_line, *info_list):
     name_list = []
@@ -63,6 +107,7 @@ def write_to_csv(filename, head_line, *info_list):
                 row_list = row.split('\t')
                 writer.writerow(row_list)
 
+
 def _to_timestamp(dt):
     timeArray = time.strptime(dt, "%Y-%m-%d %H:%M:%S")
     ts = time.mktime(timeArray)
@@ -81,9 +126,15 @@ def _to_day(ts):
     return day
 
 
-def _to_mon(ts):
+def _to_mon_without_slash(ts):
     timeArray = time.localtime(ts)
     mon = time.strftime("%Y-%m", timeArray)
+    return mon
+
+
+def _to_mon(ts):
+    timeArray = time.localtime(ts)
+    mon = time.strftime("%Y/%m", timeArray)
     return mon
 
 
@@ -131,7 +182,7 @@ def get_movie_info(m_id):
     director = 'N/A' if director_all == 'N/A' or director_all == '' else "/" .join(director_all.split('/')[0:3])
     movie_info['director'] = director
     # get create_time
-    movie_info['createTime'] = json_data['create_time'].split()[0].strip()
+    movie_info['createTime'] = json_data['create_time'].split()[0].strip().replace('-', '/')
     return movie_info
 
 
@@ -165,7 +216,7 @@ def get_movie_detailed_info(today):
     movie_url = "https://api.guoyingjiaying.cn/api/v3/movie/searchMovie"
     program_ids = []
     picture_originals = []
-    with open("zlg_dict.txt", "r") as f:
+    with open(TARGET_FILE, "r") as f:
         # 逐行遍历
         for line in f:
             # 去除每行末尾的换行符（可选）
@@ -178,12 +229,12 @@ def get_movie_detailed_info(today):
                 json_data = res.json()['data']
                 if json_data['list'] > 0:
                     for x in json_data['list']:
-                        if today in x['create_time'] and not x['picture_original'] in picture_originals:
+                        if today in x['cover_img1'] and not x['cover_img1'] in picture_originals:
                             program_ids.append(x['id'])
-                            picture_originals.append(x['picture_original'])
+                            picture_originals.append(x['cover_img1'])
             except Exception:
                 pass
-            time.sleep(random.randint(3, 5))
+            time.sleep(random.randint(8, 12))
     for id in program_ids:
         get_detailed_schedule_info(id)
         time.sleep(3 + random.randint(0, 3))
@@ -191,14 +242,20 @@ def get_movie_detailed_info(today):
 
 
 if __name__ == '__main__':
+    SOURCE_FILE = "zlg_dict.txt"    # 源文件
+    TARGET_FILE = "zlg_dict_new.txt"# 目标文件
+    SELECT_NUM = 50                 # 要选取的行数
+    # 调用函数
+    result = random_select_lines(SOURCE_FILE, TARGET_FILE, SELECT_NUM)
     movie_info_list = []
     cur_ts = int(time.time())
-    mon = _to_mon(cur_ts)
+    mon = _to_mon_without_slash(cur_ts)
     # write to movie.csv
     BASEPATH = os.path.realpath(os.path.dirname(__file__))
     f_csv = BASEPATH + os.sep + 'movie-' + mon + '.csv'
     head_instruction = "createTime\tmovie_id\tfilm\tcountry\tyear\tdirector\tduration\tcolor\tlanguage\tsubtitle\tframeRatio"
-    today = _to_day(cur_ts)
-    #today = '2025-09'
+    #today = _to_mon(cur_ts)
+    today = '2025/11'
+    print (today)
     movie_info_list = get_movie_detailed_info(today)
     write_to_csv(f_csv, head_instruction, *movie_info_list)
