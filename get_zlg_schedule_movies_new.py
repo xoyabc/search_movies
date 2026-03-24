@@ -248,7 +248,7 @@ def get_detailed_schedule_info(schedule_data, cinema_list,ts_start_day, ts_end_d
                                      movie_data['subtitle'],movie_data['projection_material'],
                                      movie_data['frameRatio'],beginTime,fare,year,program_id,movie_data['color'])
                 movie_info_list.append(movie_info)
-                time.sleep(3 + random.randint(0, 3000)/1000) 
+                time.sleep(5 + random.randint(0, 3000)/1000) 
                 print cinema_name,duration,name,movieHall,poster,director
                 print movie_info
 
@@ -268,7 +268,7 @@ def get_movie_detailed_info(start_day, cinema='北京总馆', lasting_days=31):
     if cinema == '北京总馆':
         cinema_list = ["小西天艺术影院 2号厅", "小西天艺术影院 1号厅", "百子湾艺术影院 1号厅"]
     elif cinema == '江南分馆':
-        cinema_list = ["江南分馆影院 1号厅", "江南分馆影院 3号厅", "江南分馆影院 4号厅"]
+        cinema_list = ["江南分馆影院 1号厅", "江南分馆影院 2号厅", "江南分馆影院 3号厅", "江南分馆影院 4号厅"]
     else:
         cinema_list = ["小西天艺术影院 2号厅", "小西天艺术影院 1号厅", "百子湾艺术影院 1号厅", "江南分馆影院 1号厅", "江南分馆影院 3号厅", "江南分馆影院 4号厅"]
     ts_start_day = _to_timestamp(start_day)
@@ -308,7 +308,7 @@ if __name__ == '__main__':
     BASEPATH = os.path.realpath(os.path.dirname(__file__))
     f_csv = BASEPATH + os.sep + 'movie.csv'
     head_instruction = "film\tdate\ttime\tweek\tduration\ttheater\tmovieHall\tdirector\tcountry\tlanguage\tsubtitle\tprojection_material\tframeRatio\tplayTime\tfare\tyear\tprogram_id\tcolor"
-    start_day = "2025-10-05 00:00:00"
+    start_day = "2026-04-01 00:00:00"
     if len(sys.argv) > 1:
         if sys.argv[1] == 'all':
             cinema_name = 'all'
@@ -316,7 +316,7 @@ if __name__ == '__main__':
             cinema_name = '江南分馆'
     else:
         cinema_name = '北京总馆'
-    movie_info_list = get_movie_detailed_info(start_day, cinema_name, 1) # lasting_days
+    movie_info_list = get_movie_detailed_info(start_day, cinema_name, 31) # lasting_days
     write_to_csv(f_csv, head_instruction, *movie_info_list)
     write_to_excel(*movie_info_list)
     sys.exit(0)
