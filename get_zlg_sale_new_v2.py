@@ -59,7 +59,7 @@ def write_to_csv(filename, head_line, *info_list):
         theater_order_map = {theater: index for index, theater in enumerate(theater_order)}
         hall_order_map = {hall: index for index, hall in enumerate(hall_order)}
         info_list_new = [ x.split('\t') for x in info_list]
-        info_list = sorted(info_list_new, key=lambda x:(theater_order_map.get(x[4], 1), hall_order_map.get(x[5], 1), int(x[7])), reverse=True)
+        info_list = sorted(info_list_new, key=lambda x:(theater_order_map.get(x[4], 1), hall_order_map.get(x[5], 1), float(x[9].replace('%', '')), int(x[7])), reverse=True)
         for row_list in info_list:
             #row_list = row.split('\t')
             writer.writerow(row_list)
@@ -224,7 +224,16 @@ def get_detailed_schedule_info(schedule_data, cinema_list, ts_start_day, ts_end_
                 #seatSold = int(movie_data['seatSold'])
                 seatTotal = 'N/A' if movie_data['seatTotal'] == None else int(movie_data['seatTotal'])
                 seatSold = 0 if movie_data['seatSold'] == None else int(movie_data['seatSold'])
-                sale_percent = 'N/A' if movie_data['seatTotal'] == None else '{:.0%}'.format(float(seatSold) / float(seatTotal))
+                if movie_data['seatTotal'] == None:
+                    sale_percent = 'N/A'
+                else:
+                    if seatTotal == 358 and seatSold == 357:
+                        sale_percent = '{:.1%}'.format(float(seatSold) / float(seatTotal))
+                    elif seatTotal == 622 and (619 <= seatSold <= 621):
+                        sale_percent = '{:.1%}'.format(float(seatSold) / float(seatTotal))
+                    else:
+                        sale_percent = '{:.0%}'.format(float(seatSold) / float(seatTotal))
+                #sale_percent = 'N/A' if movie_data['seatTotal'] == None else '{:.0%}'.format(float(seatSold) / float(seatTotal))
                 saleSold = fare * seatSold
                 # get date, beginTime, endTime, week
                 playTime = movie['screen_start_time']
@@ -241,7 +250,7 @@ def get_detailed_schedule_info(schedule_data, cinema_list, ts_start_day, ts_end_
                                                                              week,cinema_name,movieHall,director,
                                                                              seatSold,seatTotal,sale_percent,saleSold)
                 movie_info_list.append(movie_info)
-                time.sleep(5 + random.randint(0, 2000)/1000)
+                time.sleep(5 + random.randint(0, 5000)/1000)
                 print cinema_name,duration,name,movieHall,poster,director
                 print movie_info
 
@@ -250,9 +259,9 @@ def get_movie_detailed_info(start_day, cinema='北京总馆', lasting_days=31):
     if cinema == '北京总馆':
         cinema_list = ["小西天艺术影院 2号厅", "小西天艺术影院 1号厅", "百子湾艺术影院 1号厅"]
     elif cinema == '江南分馆':
-        cinema_list = ["江南分馆影院 1号厅", "江南分馆影院 3号厅", "江南分馆影院 4号厅"]
+        cinema_list = ["江南分馆影院 1号厅", "江南分馆影院 2号厅", "江南分馆影院 3号厅", "江南分馆影院 4号厅"]
     else:
-        cinema_list = ["小西天艺术影院 2号厅", "小西天艺术影院 1号厅", "百子湾艺术影院 1号厅", "江南分馆影院 1号厅", "江南分馆影院 3号厅", "江南分馆影院 4号厅"]
+        cinema_list = ["小西天艺术影院 2号厅", "小西天艺术影院 1号厅", "百子湾艺术影院 1号厅", "江南分馆影院 1号厅", "江南分馆影院 2号厅", "江南分馆影院 3号厅", "江南分馆影院 4号厅"]
     ts_start_day = _to_timestamp(start_day)
     ts_end_day = ts_start_day + lasting_days*24*60*60
     month_list = []
@@ -291,7 +300,7 @@ if __name__ == '__main__':
     BASEPATH = os.path.realpath(os.path.dirname(__file__))
     f_csv = BASEPATH + os.sep + 'movie.csv'
     head_instruction = "film\tdate\ttime\tweek\ttheater\tmovieHall\tdirector\tseatSold\tseatTotal\tsalePercent\tsaleSold"
-    start_day = "2025-10-05 00:00:00"
+    start_day = "2026-04-01 00:00:00"
     if len(sys.argv) > 1:
         if sys.argv[1] == 'all':
             cinema_name = 'all'
@@ -299,7 +308,7 @@ if __name__ == '__main__':
             cinema_name = '江南分馆'
     else:
         cinema_name = '北京总馆'
-    movie_info_list = get_movie_detailed_info(start_day, cinema_name, 1)
+    movie_info_list = get_movie_detailed_info(start_day, cinema_name, 30)
     if len(movie_info_list) >0:
         write_to_csv(f_csv, head_instruction, *movie_info_list)
     sys.exit(0)
